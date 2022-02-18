@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" xmlns:s="http://schemas.microsoft.com/3dmanufacturing/slice/2015/07">
+  <metadata name="Copyright">Copyright (c) 2018 3MF Consortium. All rights reserved.</metadata>
+  <resources>
+    <s:slicestack id="1" zbottom="0.000">
+      <s:sliceref slicestackid="1" slicepath="/2D/5321f611-9309-4ded-aa3a-0a0eff6be004.model" />
+    </s:slicestack>
+
+    <object id="2" name="box" thumbnail="/Thumbnails/5321f611-9309-4ded-aa3a-0a0eff6be004.png" s:slicestackid="1">
+      <mesh>
+        <vertices>
+          <vertex x="0.000" y="0.000" z="0.000" />
+          <vertex x="0.000" y="20.207" z="0.000" />
+          <vertex x="10.104" y="20.207" z="0.000" />
+          <vertex x="10.104" y="0.000" z="0.000" />
+          <vertex x="0.000" y="0.000" z="30.308" />
+          <vertex x="0.000" y="20.207" z="30.308" />
+          <vertex x="10.104" y="20.207" z="30.308" />
+          <vertex x="10.104" y="0.000" z="30.308" />
+        </vertices>
+        <triangles>
+          <triangle v1="0" v2="1" v3="2" />
+          <triangle v1="0" v2="2" v3="3" />
+          <triangle v1="4" v2="7" v3="6" />
+          <triangle v1="4" v2="6" v3="5" />
+          <triangle v1="0" v2="4" v3="5" />
+          <triangle v1="0" v2="5" v3="1" />
+          <triangle v1="1" v2="5" v3="6" />
+          <triangle v1="1" v2="6" v3="2" />
+          <triangle v1="2" v2="6" v3="7" />
+          <triangle v1="2" v2="7" v3="3" />
+          <triangle v1="3" v2="7" v3="4" />
+          <triangle v1="3" v2="4" v3="0" />
+        </triangles>
+      </mesh>
+    </object>
+  </resources>
+  <build>
+    <item objectid="2" transform="1.0000 0.0000 0.0000 0.0000 1.0000 0.0000 0.0000 0.0000 1.0000 33.0327 31.5297 14.9670"/>
+  </build>
+</model>
