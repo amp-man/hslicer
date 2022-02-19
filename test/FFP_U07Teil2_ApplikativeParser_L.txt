@@ -1,0 +1,295 @@
+-- Fortgeschrittene Funktionale Programmierung,
+--   LMU, TCS, Wintersemester 2021/22
+--   David Sabel, Henrik Wachowitz
+--
+-- Übungsblatt 07Teil2. 03.12.2021
+--
+--
+-- Thema: Applikativer Parser
+--
+-- Als Beispiel betrachten wir hier einen primitiven applikativen Parser.
+-- Alles Wesentliche liegt in dieser Datei vor. 
+-- Dies hat den Nachteil, dass es die Datei aufbläht; aber auch den Vorteil, 
+-- dass man genau sehen kann wie alles funktioniert.
+-- Also nicht abschrecken lassen, Sie müssen hier nicht alle Details verstehen!
+--
+-- Die Funktionen orientieren sich an den beiden Modulen
+--   Text.Parsec 
+--   Text.ParserCombinators.ReadP
+-- welche zwei verschiedene monadische Parser zur Verfügung stellen, 
+-- d.h. dieses Beispiel könnte man auch tatsächlich nutzen, um einen 
+-- richtigen Parser zu schreiben.
+-- Beide Module setzen jedoch im Gegensatz zu dieser vereinfachten Version 
+-- eine volle Monade ein, anstatt lediglich einen applikativen Funktor zu verwenden, 
+-- welcher auch ausreicht!
+--
+--
+-- Hinweis:
+--   Die eigentliche Aufgabenstellung befindet sich sehr weit unten in der Datei
+--
+
+module U07Teil2 where
+
+import Data.Maybe
+import Data.Char as Char
+import Data.Functor
+import Control.Applicative
+import Data.Traversable
+
+main = putStrLn "Blatt 07Teil2"
+
+
+-- newtype eines Parser wird für Instanzdeklarationen benötigt
+newtype Parser a = Parser (String -> [(a,String)])
+
+runParser :: Parser a -> String -> [(a,String)]
+runParser (Parser p) s = p s
+
+runParserComplete :: Parser a -> String -> [a]
+runParserComplete (Parser p) s = [ r | (r,"") <- p s ]
+
+-- returns first complete parse
+parse :: Parser a -> String -> Maybe a
+parse p s = listToMaybe $ runParserComplete p s
+
+instance Functor Parser where
+  fmap f (Parser p) = Parser $ \s -> map (\(a,b) -> (f a, b)) $ p s
+  
+instance Applicative Parser where
+  -- konsumiert keine Eingabe und liefert immer ein Ergebnis
+  -- pure :: a -> Parser a
+  pure x = Parser $ \s -> [(x,s)]
+  
+  -- parsed eine Funktion und aus dem Rest der Eingabe ein Argument für diese Funktion und liefert das Ergebnis
+  -- <*> :: Parser (a -> b) -> Parser a -> Parser b
+  (Parser p1) <*> (Parser p2) = Parser $ \inp ->
+    [(r1 r2, rem2) | (r1,rem1) <- p1 inp, (r2,rem2) <- p2 rem1]
+
+-- Ebenfalls in Modul Control.Applicative definiert:
+-- Typklasse Alternative ist eine Unterklasse für Applikative Funktoren 
+-- mit Monoid-Struktur, d.h.: es gibt eine assoziative binäre Verknüpfung mit neutralem Element!
+instance Alternative Parser where
+  -- neutrales Element, ein Parser der immer fehlschlägt
+  -- empty :: Parser a
+  empty = Parser $ \s -> []
+  
+  -- verknüpft zwei Parser zu einem Parser, welcher beides alternativ parsen kann
+  -- <|> :: Parser a -> Parser a -> Parser a
+  (Parser p1) <|> (Parser p2) = Parser pbranches
+    where
+      pbranches s 
+        | null r1   = r2
+        | null r2   = r1
+        | otherwise = r1 ++ r2        
+        where
+          r1 = p1 s
+          r2 = p2 s
+
+-- Basic Parsers          
+satisfy :: (Char -> Bool) -> Parser Char -- parse a desired character
+satisfy p = Parser check
+  where 
+    check (c:s) | p c = [(c,s)] -- successful
+    check   _         = [     ] -- no parse
+
+char :: Char -> Parser Char -- parse a certain character
+char c = satisfy (c ==)
+
+space :: Parser Char -- exactly one space character
+space = satisfy isSpace  
+
+alpha :: Parser Char -- any alpha chars (no numbers or special symbols)
+alpha = satisfy isAlpha
+
+upper :: Parser Char
+upper = satisfy isUpper
+
+lower :: Parser Char
+lower = satisfy isLower
+
+digit :: Parser Int
+digit = n2n <$> satisfy isDigit
+  where 
+    n2n = Char.digitToInt
+
+-- Zusammengesetze Parser
+string :: Parser String -- accepts any string
+string = some (satisfy $ (\_ -> True)) 
+    
+keyword :: String -> Parser String -- accepts only a certain string
+keyword = traverse char 
+
+name :: Parser String -- akzeptiert alle Strings aus Buchstaben
+name = some $ satisfy isAlpha
+
+name1 :: Parser String -- akzeptiert alle Strings aus Buchstaben mit großen Anfangsbuchstaben
+name1 = (:) <$> (satisfy isUpper) <*> (many $ satisfy isAlpha)
+
+skipSpaces  :: Parser ()  -- zero or more spaces skipped
+skipSpaces  = (\_ -> ()) <$> many space
+
+skipSpaces1 :: Parser () -- one or more spaces skipped
+skipSpaces1 = (\_ -> ()) <$> some space
+
+natural :: Parser Int -- parse natural number
+natural = accum <$> some digit
+  where 
+    accum = foldl (\a n -> n + a*10)  0
+    
+ptwo  :: Parser a -> Parser b -> Parser (a,b) -- parse 2-tupel
+ptwo p1 p2 = (,) <$> p1 <*> p2
+
+pPair :: Parser a -> Parser b -> Parser (a,b) -- parse (,)-encased pair
+pPair p1 p2 = (,) <$> (char '(' *> p1 <* char ',') <*> p2 <* char ')'
+    
+
+{- instance Functor ((,) a) is defined in `GHC.Base'
+mapSnd :: (b -> c) -> (a,b) -> (a,c)
+mapSnd f (x,y) = (x,(f y))
+-}
+
+
+-- Beispiele:
+--
+-- > parse upper "A"
+-- Just 'A'
+--
+-- > parse upper "AB"
+-- Nothing
+--
+-- > runParser upper "AB"
+-- [('A',"B")]
+--
+-- > runParser natural "12a"
+-- [(12,"a"),(1,"2a")]
+--
+-- > runParser (ptwo natural string) "12a"
+-- [((12,"a"),""),((1,"2a"),""),((1,"2"),"a")]
+
+
+
+-- | A7-4
+-- 
+-- Die geforderten Lösungen sind alles Einzeiler,
+-- welche im wesentlichen <$> und <*> einsetzen.
+-- Als Muster sollten Sie sich die Funktionen
+-- ptwo, name1 und später evtl. pPair anschauen!
+-- 
+
+-- a) Schreiben Sie einen Parser für den Typ Person:
+
+data Person = Person String deriving (Eq, Show)
+
+-- Namen dürfen nur aus Buchstaben bestehen und müssen mit Großbuchstaben beginnen.
+--
+-- Hinweis:
+--   Schauen Sie sich die Funktionen name und name1 an.
+--   Diese können Sie nicht nur verwenden, sondern dienen auch als Beispiel.
+--
+-- ============================================================================
+-- BEGIN LOESUNG
+
+pPerson1 :: Parser Person
+pPerson1 = Person <$> name1
+
+-- END LOESUNG
+-- ============================================================================
+
+-- b) Schreiben Sie einen weiteren Parser zum Einlesen von Personen, aber 
+--    zuerst das Schlüsselwort "Person" vor dem eigentlichen Namen kommen.
+--    Schlagen Sie dazu die Funktion (*>) im Modul Control.Applicative nach!
+
+-- ============================================================================
+pPerson2 :: Parser Person
+pPerson2  = Person <$> (keyword "Person" *> skipSpaces *> name1)
+
+-- Beispiele:
+--   > parse pPerson1 "Fred"
+--   Just (Person "Fred")
+--
+--   > runParser pPerson1 "Fred"
+--   [(Person "Fred",""),(Person "Fre","d"),(Person "Fr","ed"),(Person "F","red")]
+--
+--   > parse pPerson2 "Person Fred"
+--   Just (Person "Fred")
+-- 
+--   > parse pPerson2 "Fred"
+--   Nothing
+-- END LOESUNG
+-- ============================================================================
+
+
+-- c) Parsen Sie einen Student mit Matrikelnummer:
+
+data Student = Student String Int deriving (Eq, Show)
+
+-- ===========================================================================
+-- BEGIN LOESUNG
+pStudent1 :: Parser Student
+pStudent1 = Student <$> string <*> natural
+-- END LOESUNG
+-- ============================================================================
+
+-- d) Schreiben Sie einen weiteren Parser zum Einlesen von Studenten, wobei
+--    zuerst das Schlüsselwort "Student" vor dem eigentlichen 
+--    Namen kommt und Leerzeichen zwischen Student, Namen und Nummer erlaubt und
+--    benötigt sind.
+--    Hinweis: skipSpaces und skipSpaces1 helfen hier weiter!
+
+-- ============================================================================
+-- BEGIN LOESUNG
+pStudent2 :: Parser Student
+pStudent2 = Student <$> (keyword "Student" *> skipSpaces *> name1 <* skipSpaces1) <*> natural
+
+-- Beispiele:
+--   > parse pStudent1 "Fred0123"
+--   Just (Student "Fred012" 3)
+-- 
+--   > parse pStudent2 "Student Fred 0123"
+--   Just (Student "Fred" 123)
+-- 
+--   > parse pStudent2 "StudentFred0123"
+--   Nothing
+-- END LOESUNG
+-- ===========================================================================
+
+
+-- e) Parsen Sie einen (Hochschul-) Lehrer:
+
+data Lehrer = Prof String | Dozent Titel String deriving (Eq, Show)
+data Titel  = Dr | Herr                         deriving (Eq, Show)
+
+-- Hinweis: 
+-- Schlagen Sie dazu die Funktion (<|>) im Modul Control.Applicative nach!
+-- ===========================================================================
+-- BEGIN LOESUNG
+lehrer :: Parser Lehrer
+lehrer = prof <|> dozent
+  
+-- Es ist dazu hilfreich, mehrere einzelne Funktionen zu schreiben, 
+-- wie z.B. untenstehend vorgegeben (das ist aber kein Zwang!):
+
+prof :: Parser Lehrer
+prof = Prof <$> (keyword "Prof" *> skipSpaces *> name1)
+ 
+dozent :: Parser Lehrer
+dozent = Dozent <$> titel <*> (skipSpaces *> name1)
+
+titel :: Parser Titel
+titel =  dr <|> herr
+  where    
+    dr   = (\_ -> Dr)   <$> keyword "Dr"
+    herr = (\_ -> Herr) <$> keyword "Herr"
+
+-- Beispiele:
+--
+--  > parse lehrer "Prof Martin"
+--  Just (Prof "Martin")
+--
+--  > parse lehrer "Dr Jost"
+--  Just (Dozent Dr "Jost")
+--
+--  > parse prof "Dr Jost"
+--  Nothing
+-- END LOESUNG
+-- ===========================================================================
