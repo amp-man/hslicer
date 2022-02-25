@@ -1,7 +1,7 @@
-import Lib
+import XMLParser
 
 main :: IO ()
-main = print mesh
+main = parseVertices
 --main = someFunc
 
 vertex_0, vertex_1, vertex_2, vertex_3, vertex_4, vertex_5, vertex_6, vertex_7 :: Vertex

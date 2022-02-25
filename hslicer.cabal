@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 23cb4527851c5f2d3e4f3ee5a42efa15828327321078fdd3154568afd0226852
+-- hash: 4f195b6e7ce5b6164e79422fb44112f8b22a30c437e256079223e45058970282
 
 name:           hslicer
 version:        0.1.0.0
@@ -28,12 +28,15 @@ source-repository head
 library
   exposed-modules:
       Lib
+      XMLParser
   other-modules:
       Paths_hslicer
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , text
+    , xml-conduit
   default-language: Haskell2010
 
 executable hslicer-exe
@@ -46,11 +49,13 @@ executable hslicer-exe
   build-depends:
       base >=4.7 && <5
     , hslicer
+    , text
+    , xml-conduit
   default-language: Haskell2010
 
 test-suite hslicer-test
   type: exitcode-stdio-1.0
-  main-is: Spec.hs
+  main-is: xml.hs
   other-modules:
       Paths_hslicer
   hs-source-dirs:
@@ -59,4 +64,6 @@ test-suite hslicer-test
   build-depends:
       base >=4.7 && <5
     , hslicer
+    , text
+    , xml-conduit
   default-language: Haskell2010
