@@ -1,18 +1,22 @@
 import XMLParser
 
 main :: IO ()
-main = parseVertices
+main = do 
+    let path = "test\\box_sliced\\3D\\3dmodel.model"
+    vertices <- parseVertices path
+    triangles <- parseTriangles path vertices
+    putStrLn $ "vertices: " ++ (show vertices) ++ "\n\ntriangles: " ++ (show triangles)
 --main = someFunc
 
-vertex_0, vertex_1, vertex_2, vertex_3, vertex_4, vertex_5, vertex_6, vertex_7 :: Vertex
-vertex_0 = Vertex {x = 0.000, y = 0.000, z = 0.000}
-vertex_1 = Vertex {x = 0.000, y = 20.207, z = 0.000}
-vertex_2 = Vertex {x = 10.104, y = 20.207, z = 0.000}
-vertex_3 = Vertex {x = 10.104, y = 0.000, z = 0.000}
-vertex_4 = Vertex {x = 0.000, y = 0.000, z = 30.308}
-vertex_5 = Vertex {x = 0.000, y = 20.207, z = 30.308}
-vertex_6 = Vertex {x = 10.104, y = 20.207, z = 30.308}
-vertex_7 = Vertex {x = 10.104, y = 0.000, z = 30.308}
+{- vertex_0, vertex_1, vertex_2, vertex_3, vertex_4, vertex_5, vertex_6, vertex_7 :: Vertex
+vertex_0 = Vertex {_x = 0.000, _y = 0.000, _z = 0.000}
+vertex_1 = Vertex {_x = 0.000, _y = 20.207, _z = 0.000}
+vertex_2 = Vertex {_x = 10.104, _y = 20.207, _z = 0.000}
+vertex_3 = Vertex {_x = 10.104, _y = 0.000, _z = 0.000}
+vertex_4 = Vertex {_x = 0.000, _y = 0.000, _z = 30.308}
+vertex_5 = Vertex {_x = 0.000, _y = 20.207, _z = 30.308}
+vertex_6 = Vertex {_x = 10.104, _y = 20.207, _z = 30.308}
+vertex_7 = Vertex {_x = 10.104, _y = 0.000, _z = 30.308}
 
 triangle_0, triangle_1, triangle_2, triangle_3, triangle_4, triangle_5, triangle_6, triangle_7, triangle_8, triangle_9, triangle_10, triangle_11 :: Triangle 
 triangle_0 = Triangle vertex_0 vertex_1 vertex_2 -- <triangle v1="0" v2="1" v3="2" />
@@ -28,7 +32,7 @@ triangle_9 = Triangle vertex_2 vertex_7 vertex_3 -- <triangle v1="2" v2="7" v3="
 triangle_10 = Triangle vertex_3 vertex_7 vertex_4-- <triangle v1="3" v2="7" v3="4" />
 triangle_11 = Triangle vertex_3 vertex_4 vertex_0-- <triangle v1="3" v2="4" v3="0" />
 
-mesh = [triangle_0, triangle_1, triangle_2, triangle_3, triangle_4, triangle_5, triangle_6, triangle_7, triangle_8, triangle_9, triangle_10, triangle_11]
+mesh = [triangle_0, triangle_1, triangle_2, triangle_3, triangle_4, triangle_5, triangle_6, triangle_7, triangle_8, triangle_9, triangle_10, triangle_11] -}
 
 -- <mesh>
 --         <vertices>

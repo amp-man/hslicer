@@ -1,28 +1,49 @@
 {-# LANGUAGE OverloadedStrings #-}
-module XMLParser where
+module XMLParser (
+    Vertex (..),
+    Triangle (..),
+    parseVertices,
+    parseTriangles
+    )
+    where
 
 import Prelude hiding (readFile)
 import Text.XML
 import Text.XML.Cursor
 import qualified Data.Text as T
 
-data Vertex = Vertex {x :: Double, y :: Double, z :: Double} deriving Show
+data Vertex = Vertex {_x :: Double, _y :: Double, _z :: Double} deriving Show
 
 data Triangle = Triangle {_v1 :: Vertex, _v2 :: Vertex, _v3 :: Vertex} deriving Show
 
-verticesElement, vertexElement :: Name
-verticesElement = Name "vertices" (Just "http://schemas.microsoft.com/3dmanufacturing/core/2015/02") Nothing
-vertexElement = Name "vertex" (Just "http://schemas.microsoft.com/3dmanufacturing/core/2015/02") Nothing
-
-parseVertices :: IO ()
-parseVertices = do
-    file <- readFile def "test\\box_sliced\\3D\\3dmodel.model"
-    -- file <- readFile def "test\\box_sliced_0.2mm.gcode"
+parseVertices :: FilePath -> IO [Vertex]
+parseVertices path = do
+    file <- readFile def path
     let cursor = fromDocument file
-    print $ zip3
-            (cursor $// element verticesElement >=> child >=> element vertexElement >=> attribute "x")
-            (cursor $// element verticesElement >=> child >=> element vertexElement >=> attribute "y")
-            (cursor $// element verticesElement >=> child >=> element vertexElement >=> attribute "z")
-                --Vertex {x = attribute "x", y = attribute "y", z = attribute "z"}
-                --Vertex (attribute "x") (attribute "y") (attribute "z")
-        -- >>= element vertexElement >>= descendant >>= content
+    return $
+        cursor $// element vertices &// element vertex >=> 
+            \axis -> [Vertex {_x = convertToDouble $ attribute "x" axis, _y = convertToDouble $ attribute "y" axis, _z = convertToDouble $ attribute "z" axis}]
+
+parseTriangles :: FilePath -> [Vertex] -> IO [Triangle]
+parseTriangles path vs = do
+    file <- readFile def path
+    let cursor = fromDocument file
+    return $
+        cursor $// element triangles &// element triangle >=>
+            \axis -> [Triangle {_v1 = deriveVertex (attribute "v1" axis) vs, _v2 = deriveVertex (attribute "v2" axis) vs, _v3 = deriveVertex (attribute "v3" axis) vs}]
+
+
+convertToDouble :: [T.Text] -> Double
+convertToDouble text = read $ T.unpack $ T.concat text ::Double
+
+deriveVertex :: [T.Text] -> [Vertex] -> Vertex
+deriveVertex index list = list !! (read $ T.unpack $ T.concat index :: Int)
+
+nameSpace3mf :: T.Text
+nameSpace3mf = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
+
+vertices, vertex, triangles, triangle :: Name
+vertices = Name "vertices" (Just nameSpace3mf) Nothing
+vertex = Name "vertex" (Just nameSpace3mf) Nothing
+triangles = Name "triangles" (Just nameSpace3mf) Nothing
+triangle = Name "triangle" (Just nameSpace3mf) Nothing
