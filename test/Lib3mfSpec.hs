@@ -1,8 +1,7 @@
-import Lib
+import Lib3mf
 
 main :: IO ()
 main = print mesh
---main = someFunc
 
 vertex_0, vertex_1, vertex_2, vertex_3, vertex_4, vertex_5, vertex_6, vertex_7 :: Vertex
 vertex_0 = Vertex {x = 0.000, y = 0.000, z = 0.000}
