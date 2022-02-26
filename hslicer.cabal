@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3b1813e341961bfe11a8082ffcb09a0315cd7607b3694743c35167077377eaf2
+-- hash: 0da396821622497aea78b1fc5a7d931bf931bf01080b74e0ff7d6043f25b84e3
 
 name:           hslicer
 version:        0.1.0.0
@@ -54,6 +54,7 @@ test-suite hslicer-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      LibGcodeSpec
       Paths_hslicer
   hs-source-dirs:
       test
@@ -61,4 +62,5 @@ test-suite hslicer-test
   build-depends:
       base >=4.7 && <5
     , hslicer
+    , hspec
   default-language: Haskell2010
