@@ -1,27 +1,34 @@
-{-# LANGUAGE FlexibleInstances #-}
 module LibGcode
     where
 
-data GCmd = AbsProgr Coordinates
-            | RelProgr Coordinates
+import GHC.IO.FD (openFile)
+import GHC.IO.IOMode (IOMode(WriteMode))
+
+writeGCode :: FilePath -> [GCmd] -> IO()
+writeGCode fp gcode = writeFile fp $ prettyGCode gcode
+
+-- List of GCmd (GCode)
+prettyGCode :: [GCmd] -> String
+prettyGCode [] = ""
+prettyGCode (x:xs) = prettyGCmd x ++ "\n" ++ prettyGCode xs
+
+-- GCmd
+data GCmd = AbsProgr [GArg]
+            | RelProgr [GArg]
             | Text String
 
-data Coordinates = Coord {x :: Double, y :: Double} deriving Show
--- data Coordinates = Coord {x :: Double, y :: Double, z :: Double, e :: Double, f :: Double} deriving Show
+prettyGCmd :: GCmd -> String
+prettyGCmd (AbsProgr x) = "G91 " ++ prettyGArgs x
+prettyGCmd (RelProgr x) = "G90 " ++ prettyGArgs x
+prettyGCmd (Text x) = show x
 
--- instance Show Coordinates where
---     show (AbsProgr x) = "G91 " ++ show x
---     show (RelProgr x) = "G90 " ++ show x
---     show (Text x) = show x
+-- GCmd Arguments
+prettyGArgs :: [GArg] -> String
+prettyGArgs [] = ""
+prettyGArgs (x:xs) = prettyGArg x ++ " " ++ prettyGArgs xs
 
-instance Show GCmd where
-    show (AbsProgr x) = "G91 " ++ show x
-    show (RelProgr x) = "G90 " ++ show x
-    show (Text x) = show x
+data GArg = GArg {name :: String, value :: Maybe String}
 
-showsGcode :: [GCmd] -> ShowS
-showsGcode [] = shows ""
-showsGcode (x:xs) = shows x . ('\n':) . showsGcode xs
-
-instance {-# OVERLAPPING #-} Show [GCmd] where
-    showsPrec _ x = showsGcode x
+prettyGArg :: GArg -> String
+prettyGArg (GArg name Nothing) = name
+prettyGArg (GArg name (Just value)) = name ++ value
