@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 23cb4527851c5f2d3e4f3ee5a42efa15828327321078fdd3154568afd0226852
+-- hash: 4e9f7b2a1a94b2c19e2b89ab15e95e62076d4abd62fbe865f1941adcd1cee82c
 
 name:           hslicer
 version:        0.1.0.0
@@ -27,7 +27,8 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Lib3mf
+      LibGcode
   other-modules:
       Paths_hslicer
   hs-source-dirs:
@@ -52,6 +53,8 @@ test-suite hslicer-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Lib3mfSpec
+      LibGcodeSpec
       Paths_hslicer
   hs-source-dirs:
       test

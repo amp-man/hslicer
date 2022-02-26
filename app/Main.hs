@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Lib3mf
 
 main :: IO ()
 main = someFunc
