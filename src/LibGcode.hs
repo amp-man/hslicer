@@ -1,6 +1,6 @@
 module LibGcode(
-    GCmd,
-    GArg,
+    GCmd (..),
+    GArg (..),
     writeGCode,
     prettyGCode
 )
