@@ -1,6 +1,6 @@
 module LibGcodeSpec where
 
-import LibGcode(GCmd(..), GArg(..), writeGCode, prettyGCode)
+import LibGcode(GCmd, GArg, writeGCode, prettyGCode)
 
 import Test.Hspec (Spec, describe, context, it, shouldBe)
 

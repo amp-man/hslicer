@@ -1,8 +1,13 @@
-module LibGcode
+module LibGcode(
+    GCmd,
+    GArg,
+    writeGCode,
+    prettyGCode
+)
     where
 
-import GHC.IO.FD (openFile)
-import GHC.IO.IOMode (IOMode(WriteMode))
+--import GHC.IO.FD (openFile)
+--import GHC.IO.IOMode (IOMode(WriteMode))
 
 writeGCode :: FilePath -> [GCmd] -> IO()
 writeGCode fp gcode = writeFile fp $ prettyGCode gcode
