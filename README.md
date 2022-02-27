@@ -24,3 +24,5 @@ Geplante vertiefende Themen:
 
 In Ordnung, vielleicht kann man ja auch einen Teilparser mit den applikativen Parsern implementieren,
 um Applicative als Thema zu demonstrieren.
+
+Co-authored-by: KatjaFrey <KatjaFrey@users.noreply.github.com>

@@ -27,6 +27,7 @@ library
   exposed-modules:
       Lib3mf
       LibGcode
+      LibHslicer
   other-modules:
       Paths_hslicer
   hs-source-dirs:
