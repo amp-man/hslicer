@@ -14,7 +14,13 @@ import qualified Data.Text as T
 
 data Vertex = Vertex {_x :: Double, _y :: Double, _z :: Double} deriving Show
 
+instance Eq Vertex where
+  (Vertex x1 y1 z1) == (Vertex x2 y2 z2) = x1 == x2 && y1 == y2 && z1 == z2
+
 data Triangle = Triangle {_v1 :: Vertex, _v2 :: Vertex, _v3 :: Vertex} deriving Show
+
+instance Eq Triangle where
+    (Triangle v1 v2 v3) == (Triangle v1' v2' v3') = v1 == v1' && v2 == v2' && v3 == v3'
 
 parseVertices :: FilePath -> IO [Vertex]
 parseVertices path = do

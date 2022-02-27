@@ -57,6 +57,7 @@ test-suite hslicer-test
   other-modules:
       Lib3mfSpec
       LibGcodeSpec
+      LibHslicerSpec
       Paths_hslicer
   hs-source-dirs:
       test
