@@ -40,7 +40,7 @@ executables:
 
 tests:
   hslicer-test:
-    main:                xml.hs
+    main:                Spec.hs
     source-dirs:         test
     ghc-options:
     - -threaded

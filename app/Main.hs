@@ -3,4 +3,5 @@ module Main where
 import Lib3mf
 
 main :: IO ()
-main = someFunc
+main = undefined
+
