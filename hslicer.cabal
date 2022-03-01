@@ -27,7 +27,8 @@ library
   exposed-modules:
       Lib3mf
       LibGcode
-      LibHslicer
+      LibHslicer.Contour
+      LibHslicer.PlanarSlice
   other-modules:
       Paths_hslicer
   hs-source-dirs:
@@ -60,7 +61,7 @@ test-suite hslicer-test
   other-modules:
       Lib3mfSpec
       LibGcodeSpec
-      LibHslicerSpec
+      LibHslicer.ContourSpec
       Paths_hslicer
   hs-source-dirs:
       test

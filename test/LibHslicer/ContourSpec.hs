@@ -1,6 +1,6 @@
-module LibHslicerSpec where
+module LibHslicer.ContourSpec where
 
-import LibHslicer
+import LibHslicer.Contour
 import Lib3mf
 import Test.Hspec (Spec, describe, context, it, shouldBe)
 

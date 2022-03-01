@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module LibHslicer where
+module LibHslicer.Contour where
 
 import Lib3mf
 import Control.Lens (over, view, set, (&), makeLenses)
@@ -8,7 +8,8 @@ import Data.Maybe (fromMaybe)
 import Data.List
 
 data IntersecTriangle = IntersecTriangle {_triangle :: Triangle, _intersections :: [Vertex]} deriving Show
-newtype Contour = Contour [Vertex]
+newtype InnerContour = Inner [Vertex]
+newtype OuterContour = Outer [Vertex]
 
 instance Eq IntersecTriangle where
     (IntersecTriangle t ins) == (IntersecTriangle t' ins') = t == t' && all (`elem` ins') ins && all (`elem` ins) ins'
@@ -81,8 +82,14 @@ findConnection intTri todo done =
 -- [Triangle] --> filtere intersecting triangles => [Triangle] (length <= input list) --> map calcIntersecTriangle => [IntersecTriangle] => ordnen
 -- Fall1: Kein Cluster
 -- Fall2: Cluster (3 IntersectingVertices): NOCH NICHT Implementiert
-generateContour :: [Triangle] -> Contour
+generateContour :: [Triangle] -> [Either InnerContour OuterContour]
 generateContour = undefined
+
+-----------------------------------------------------------------
+--Contour Fulfilment : Layer Width, Layer Height als param in main
+
+calculateOffset :: [Either InnerContour OuterContour] -> Double
+calculateOffset = undefined
 
 --                             main: LineWidth, TriangleMesh -> [Contour]
 --                         /                                                               \
