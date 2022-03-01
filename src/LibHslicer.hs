@@ -53,8 +53,8 @@ calcIntersecTriangle t zSlice = calcIntersections t zSlice [] where
 -- calcIntersecTriangles :: [Triangle] -> Double -> [IntersecTriangle]
 -- calcIntersecTriangles = undefined
 
-putConnectionFirst :: IntersecTriangle -> Vertex -> IntersecTriangle
-putConnectionFirst intTri v = intTri & set intersections (v : remove v (view intersections intTri)) where
+putConnectionFirst :: Vertex -> IntersecTriangle -> IntersecTriangle
+putConnectionFirst v intTri = intTri & set intersections (v : remove v (view intersections intTri)) where
     remove _ [] = []
     remove e xs = [x | x <- xs, x /= e]
 
@@ -70,7 +70,7 @@ findConnection intTri [] [] = intTri
 findConnection intTri todo done =
     let start = last $ view intersections intTri
     in case find (\e -> start `elem` (e & view intersections)) todo of
-        Just dest -> dest
+        Just dest -> putConnectionFirst start dest
         Nothing -> fromMaybe intTri (find (\e -> start `elem` (e & view intersections)) done)
 {- findConnection intTri todo done = if any $ map (elem (last $ view intersections intTri)) (view traverse.intersections todo) 
     then find (\e -> elem (last $ view intersections intTri) (e & view intersections))-- get matching intTri from todo
