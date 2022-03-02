@@ -41,6 +41,12 @@ mapV f (Vertex x y z) = Vertex (f x) (f y) (f z)
 addV :: Vertex -> Vertex -> Vertex
 addV (Vertex x1 y1 z1) (Vertex x2 y2 z2) = Vertex (x1 + x2) (y1 + y2) (z1 + z2)
 
+vertexLength :: Vertex -> Double
+vertexLength (Vertex x y z) = sqrt(x**2 + y**2 + z**2)
+
+vertexNormalize :: Vertex -> Vertex
+vertexNormalize v@(Vertex x y z) = Vertex (x*vertexLength v) (y*vertexLength v) (z*vertexLength v)
+
 parseVertices :: FilePath -> IO [Vertex]
 parseVertices path = do
     file <- readFile def path
