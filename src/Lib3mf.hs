@@ -12,6 +12,10 @@ module Lib3mf (
     vertex3,
     mapV,
     addV,
+    vertexNormalize,
+    vertexDiagonal,
+    vertexLength,
+    vertexFlip,
     parseVertices,
     parseTriangles
     )
@@ -45,7 +49,13 @@ vertexLength :: Vertex -> Double
 vertexLength (Vertex x y z) = sqrt(x**2 + y**2 + z**2)
 
 vertexNormalize :: Vertex -> Vertex
-vertexNormalize v@(Vertex x y z) = Vertex (x*vertexLength v) (y*vertexLength v) (z*vertexLength v)
+vertexNormalize v@(Vertex x y z) = Vertex (x/vertexLength v) (y/vertexLength v) (z/vertexLength v)
+
+vertexFlip :: Vertex -> Vertex
+vertexFlip = mapV (*(-1))
+
+vertexDiagonal :: Vertex -> Vertex -> Vertex
+vertexDiagonal v1 v2 = vertexFlip v1 `addV` v2
 
 parseVertices :: FilePath -> IO [Vertex]
 parseVertices path = do
