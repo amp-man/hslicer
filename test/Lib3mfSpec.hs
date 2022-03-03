@@ -6,9 +6,9 @@ import Test.Hspec (Spec, describe, context, it, shouldBe)
 spec :: Spec
 spec = do
     let path = "test/Lib3mfSpec_res/box_sliced/3D/3dmodel.model"
-        v1 = Vertex (-2.0) (-1.0) 0.0
-        v2 = Vertex (-1.0) (-2.0) 0.0
-        v1v2diag = Vertex (-1.0) 1.0 0.0
+        v1 = Vertex 2.0 1.0 0.0
+        v2 = Vertex 1.0 2.0 0.0
+        offsetnormal = Vertex 1.0 (-1.0) 0.0
     it "parses Vertices from 3mf file" $ do
         vertices <- parseVertices path
         vertices `shouldBe` [vertex_0,vertex_1,vertex_2,vertex_3,vertex_4,vertex_5,vertex_6,vertex_7]
@@ -22,10 +22,14 @@ spec = do
         vertexLength (Vertex 1.0 2.0 0.0) `shouldBe` sqrt 5
     it "normalizes vertex" $
         vertexNormalize (Vertex 3.0 1.0 2.0) `shouldBe` Vertex (3.0/sqrt 14) (1.0/sqrt 14) (2.0/sqrt 14)
-    it "calculates diagonal of two concave vertices (vector turns left)" $
-        vertexDiagonal v1 v2 `shouldBe` v1v2diag
-    it "calculates diagonal of two convex vertices (vector turns right)" $
-        vertexDiagonal v2 v1 `shouldBe` v1v2diag
+    it "calculates parallelogram diagonal of two convex vertices (vectors turn left)" $
+        vertexDiagonal v1 v2 `shouldBe` Vertex (-1.0) 1.0 0.0
+    it "calculates parallelogram diagonal of two concave vertices (vectors turn right)" $
+        vertexDiagonal v2 v1 `shouldBe` Vertex 1.0 (-1.0) 0.0
+    it "calculates offset normal of two convex vertices (vectors turn left)" $
+        offsetNormal v1 v2 `shouldBe` vertexNormalize offsetnormal
+    it "calculates offset normal of two concave vertices (vectors turn right)" $
+        offsetNormal v2 v1 `shouldBe` vertexNormalize offsetnormal
 
 vertex_0, vertex_1, vertex_2, vertex_3, vertex_4, vertex_5, vertex_6, vertex_7 :: Vertex
 vertex_0 = Vertex 0.000 0.000 0.000
