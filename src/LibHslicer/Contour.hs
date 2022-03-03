@@ -82,16 +82,26 @@ findConnection intTri todo done =
 -- [Triangle] --> filtere intersecting triangles => [Triangle] (length <= input list) --> map calcIntersecTriangle => [IntersecTriangle] => ordnen
 -- Fall1: Kein Cluster
 -- Fall2: Cluster (3 IntersectingVertices): NOCH NICHT Implementiert
-generateContour :: [Triangle] -> [Either InnerContour OuterContour]
-generateContour = undefined
+-- generateContour :: [Triangle] -> [Either InnerContour OuterContour]
+-- generateContour = undefined
 
------------------------------------------------------------------
---Contour Fulfilment : Layer Width, Layer Height als param in main
+-- Assuming anti-clockwise winding of path: Left is inside of contour, right outside
+-- Offset Point is calculated by moving contour point along diagonal of two contour vertices
+-- Negative offset is to inside of contour, Positive to outside
+-- TODO: All Vertices should be Points with 2 Dimensions only
+calculateOffsetForPoint :: Double -> Vertex -> Vertex -> Vertex -> Vertex
+calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
+    where
+        p1p2vec = p2 `addV` vertexFlip p1
+        p2p3vec = p3 `addV` vertexFlip p2
+        offsetnormal = offsetNormal p1p2vec p2p3vec
+        alpha = acos(dot p1p2vec offsetnormal / (vertexLength p1p2vec * vertexLength offsetnormal))
+        b = a / tan alpha
+        diagoffset = signum a * sqrt(a**2 + b**2)
 
-calculateOffset :: [Either InnerContour OuterContour] -> Double
-calculateOffset = undefined
-
---                             main: LineWidth, TriangleMesh -> [Contour]
---                         /                                                               \
--- LineWidth, TriangleMesh                                                                   \
---                         \                                                                  generateGCode -> G91 X0 Y0 G91 X1 Y1 E0.75
+-- TODO: All Vertices should be Points with 2 Dimensions only
+calculateOffsetForContour :: Double -> [Vertex] -> [Vertex]
+calculateOffsetForContour _ [] = undefined
+calculateOffsetForContour o (p1:p2:p3:ps) = calculateOffsetForPoint o p1 p2 p3 : calculateOffsetForContour o (p2:p3:ps)
+calculateOffsetForContour o (p1:p2:ps) = undefined
+calculateOffsetForContour o (p1:ps) = undefined

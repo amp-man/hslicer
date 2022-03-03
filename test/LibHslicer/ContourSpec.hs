@@ -16,6 +16,10 @@ spec = do
         intTri1 = IntersecTriangle t1 [v3, v1]
         intTri2 = IntersecTriangle t2 [v2, v1]
         intTri3 = IntersecTriangle t3 [v2, v3]
+        -- TODO: Should be points with 2 Dimensions only
+        rectangle = [Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0, Vertex 0 10 0]
+        -- TODO: Should be points with 2 Dimensions only
+        smallrectangle = [Vertex 1 1 0, Vertex 9 1 0, Vertex 9 9 0, Vertex 1 9 0]
     it "detects intersection z1 > z* > z2" $
        isIntersectingVertex v2 v1 0.5 `shouldBe` True
     it "detects intersection z2 > z* > z1" $
@@ -30,3 +34,6 @@ spec = do
        calcIntersecVertex v1 v2 3.0 `shouldBe` Nothing
     it "finds connection" $
        findConnection intTri1 [intTri2, intTri3] ([] :: [IntersecTriangle]) `shouldBe` IntersecTriangle t2 [v1, v2]
+    it "offsets a path section by -1" $
+       calculateOffsetForPoint (-1) (Vertex 0 0 0) (Vertex 10 0 0) (Vertex 10 10 0) `shouldBe` Vertex 9 1 0
+       
