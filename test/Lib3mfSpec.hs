@@ -8,7 +8,10 @@ spec = do
     let path = "test/Lib3mfSpec_res/box_sliced/3D/3dmodel.model"
         v1 = Vertex 2.0 1.0 0.0
         v2 = Vertex 1.0 2.0 0.0
-        offsetnormal = Vertex 1.0 (-1.0) 0.0
+        v1v2odiag = Vertex 1.0 (-1.0) 0.0
+        vra1 = Vertex 10 0 0
+        vra2 = Vertex 0 10 0
+        vradiag = Vertex 1.0 (-1.0) 0.0
     it "parses Vertices from 3mf file" $ do
         vertices <- parseVertices path
         vertices `shouldBe` [vertex_0,vertex_1,vertex_2,vertex_3,vertex_4,vertex_5,vertex_6,vertex_7]
@@ -27,9 +30,11 @@ spec = do
     it "calculates parallelogram diagonal of two concave vertices (vectors turn right)" $
         vertexDiagonal v2 v1 `shouldBe` Vertex 1.0 (-1.0) 0.0
     it "calculates offset normal of two convex vertices (vectors turn left)" $
-        offsetNormal v1 v2 `shouldBe` vertexNormalize offsetnormal
+        offsetNormal v1 v2 `shouldBe` vertexNormalize v1v2odiag
+    it "calculates offset normal of two convex right angle vertices" $
+        offsetNormal vra1 vra2 `shouldBe` vertexNormalize vradiag
     it "calculates offset normal of two concave vertices (vectors turn right)" $
-        offsetNormal v2 v1 `shouldBe` vertexNormalize offsetnormal
+        offsetNormal v2 v1 `shouldBe` vertexNormalize v1v2odiag
 
 vertex_0, vertex_1, vertex_2, vertex_3, vertex_4, vertex_5, vertex_6, vertex_7 :: Vertex
 vertex_0 = Vertex 0.000 0.000 0.000

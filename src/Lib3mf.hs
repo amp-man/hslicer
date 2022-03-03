@@ -12,6 +12,7 @@ module Lib3mf (
     vertex3,
     mapV,
     addV,
+    dot,
     vertexNormalize,
     vertexDiagonal,
     vertexLength,
@@ -46,9 +47,13 @@ mapV f (Vertex x y z) = Vertex (f x) (f y) (f z)
 addV :: Vertex -> Vertex -> Vertex
 addV (Vertex x1 y1 z1) (Vertex x2 y2 z2) = Vertex (x1 + x2) (y1 + y2) (z1 + z2)
 
+dot :: Vertex -> Vertex -> Double
+dot (Vertex x1 y1 z1) (Vertex x2 y2 z2) = (x1*x2)+(y1*y2)+(z1*z2)
+
 vertexLength :: Vertex -> Double
 vertexLength (Vertex x y z) = sqrt(x**2 + y**2 + z**2)
 
+-- TODO: Should be two dimensional Vertex only
 xyCrossProduct :: Vertex -> Vertex -> Double
 xyCrossProduct (Vertex x1 y1 z1) (Vertex x2 y2 z2) = x1*y2-y1*x2
 
@@ -60,16 +65,19 @@ vertexFlip :: Vertex -> Vertex
 vertexFlip = mapV (*(-1))
 
 -- According to parallelogram addition Rules
+-- Relative Vertices
 vertexDiagonal :: Vertex -> Vertex -> Vertex
 vertexDiagonal v1 v2 = vertexFlip v1 `addV` v2
 
 -- Assuming anti-clockwise winding of Path
+-- Relative Vertices
 offsetNormal :: Vertex -> Vertex -> Vertex
-offsetNormal v1 v2 = vertexNormalize $ leftifyNormal v1 $ vertexDiagonal v1 v2
+offsetNormal v1 v2 = vertexNormalize $ flipToRight v1 $ vertexDiagonal v1 v2
 
 -- Assuming anti-clockwise winding of path
-leftifyNormal :: Vertex -> Vertex -> Vertex
-leftifyNormal v vn = if xyCrossProduct v vn > 0 then vertexFlip vn else vn
+-- Relative Vertices
+flipToRight :: Vertex -> Vertex -> Vertex
+flipToRight v vn = if xyCrossProduct v vn > 0 then vertexFlip vn else vn
 
 parseVertices :: FilePath -> IO [Vertex]
 parseVertices path = do
