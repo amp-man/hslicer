@@ -85,6 +85,7 @@ findConnection intTri todo done =
 -- generateContour :: [Triangle] -> [Either InnerContour OuterContour]
 -- generateContour = undefined
 
+-- Inspired by Aichholzer et al.(1995),"A novel type of skeleton for polygons": https://www.jucs.org/jucs_1_12/a_novel_type_of/
 -- Assuming anti-clockwise winding of path: Left is inside of contour, right outside
 -- Offset Point is calculated by moving contour point along diagonal of two contour vertices
 -- Negative offset is to inside of contour, Positive to outside
@@ -101,7 +102,10 @@ calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
 
 -- TODO: All Vertices should be Points with 2 Dimensions only
 calculateOffsetForContour :: Double -> [Vertex] -> [Vertex]
-calculateOffsetForContour _ [] = undefined
-calculateOffsetForContour o (p1:p2:p3:ps) = calculateOffsetForPoint o p1 p2 p3 : calculateOffsetForContour o (p2:p3:ps)
-calculateOffsetForContour o (p1:p2:ps) = undefined
-calculateOffsetForContour o (p1:ps) = undefined
+calculateOffsetForContour _ [] = []
+calculateOffsetForContour o c@(p1:p2:ps) = calculateOffsetForPoint o (last ps) p1 p2 : calculateOffsetForContour' o (c++[p1])
+      where calculateOffsetForContour' :: Double -> [Vertex] -> [Vertex]
+            calculateOffsetForContour' _ [] = []
+            calculateOffsetForContour' o (p1:p2:p3:ps) = calculateOffsetForPoint o p1 p2 p3 : calculateOffsetForContour' o (p2:p3:ps)
+            calculateOffsetForContour' o _ = []
+calculateOffsetForContour o [p1] = []

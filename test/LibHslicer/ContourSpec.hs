@@ -3,6 +3,7 @@ module LibHslicer.ContourSpec where
 import LibHslicer.Contour
 import Lib3mf
 import Test.Hspec (Spec, describe, context, it, shouldBe)
+import LibHslicer.Contour (calculateOffsetForContour)
 
 spec :: Spec
 spec = do
@@ -34,6 +35,16 @@ spec = do
        calcIntersecVertex v1 v2 3.0 `shouldBe` Nothing
     it "finds connection" $
        findConnection intTri1 [intTri2, intTri3] ([] :: [IntersecTriangle]) `shouldBe` IntersecTriangle t2 [v1, v2]
-    it "offsets a path section by -1" $
+    it "offsets a path section Midpoint by -1" $
        calculateOffsetForPoint (-1) (Vertex 0 0 0) (Vertex 10 0 0) (Vertex 10 10 0) `shouldBe` Vertex 9 1 0
+    it "offsets a path section Midpoint by -2" $
+       calculateOffsetForPoint (-2) (Vertex 0 0 0) (Vertex 10 0 0) (Vertex 10 10 0) `shouldBe` Vertex 8 2 0
+    it "offsets a path section Midpoint by -2" $
+       calculateOffsetForPoint (-2) (Vertex 10 0 0) (Vertex 10 10 0) (Vertex 0 10 0) `shouldBe` Vertex 8 8 0
+    it "offsets a path section Midpoint by -2" $
+       calculateOffsetForPoint (-2) (Vertex 10 10 0) (Vertex 0 10 0) (Vertex 0 0 0) `shouldBe` Vertex 2 8 0
+    it "offsets a path section Midpoint by -1" $
+       calculateOffsetForPoint (-1) (Vertex 10 10 0) (Vertex 0 10 0) (Vertex 0 0 0) `shouldBe` Vertex 1 9 0
+    it "offsets a contour by -1" $
+       calculateOffsetForContour (-1) rectangle `shouldBe` smallrectangle
        
