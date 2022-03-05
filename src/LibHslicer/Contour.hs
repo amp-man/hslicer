@@ -101,6 +101,7 @@ calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
         diagoffset = signum a * sqrt(a**2 + b**2)
 
 -- TODO: All Vertices should be Points with 2 Dimensions only
+-- TODO: Last POint is possibly at end of list again bc closed contour
 calculateOffsetForContour :: Double -> [Vertex] -> [Vertex]
 calculateOffsetForContour _ [] = []
 calculateOffsetForContour o c@(p1:p2:ps) = calculateOffsetForPoint o (last ps) p1 p2 : calculateOffsetForContour' o (c++[p1])

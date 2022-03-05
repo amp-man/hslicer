@@ -55,7 +55,7 @@ vertexLength (Vertex x y z) = sqrt(x**2 + y**2 + z**2)
 
 -- TODO: Should be two dimensional Vertex only
 xyCrossProduct :: Vertex -> Vertex -> Double
-xyCrossProduct (Vertex x1 y1 z1) (Vertex x2 y2 z2) = x1*y2-y1*x2
+xyCrossProduct (Vertex x1 y1 _) (Vertex x2 y2 _) = x1*y2-y1*x2
 
 vertexNormalize :: Vertex -> Vertex
 vertexNormalize v@(Vertex x y z) = Vertex (x/vlength) (y/vlength) (z/vlength)
