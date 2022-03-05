@@ -8,8 +8,8 @@ import Data.Maybe (fromMaybe)
 import Data.List
 
 data IntersecTriangle = IntersecTriangle {_triangle :: Triangle, _intersections :: [Vertex]} deriving Show
-newtype InnerContour = Inner [Vertex]
-newtype OuterContour = Outer [Vertex]
+newtype InnerContour = Inner [Vertex] deriving Show
+newtype OuterContour = Outer [Vertex] deriving Show
 
 instance Eq IntersecTriangle where
     (IntersecTriangle t ins) == (IntersecTriangle t' ins') = t == t' && all (`elem` ins') ins && all (`elem` ins) ins'
@@ -21,11 +21,10 @@ isIntersectingVertex v1 v2 zSlice = let z1 = view zCoord v1
                                         z2 = view zCoord v2
                                     in (z1 >= zSlice && z2 <= zSlice) || (z1 <= zSlice && z2 >= zSlice)
 
--- isIntersectingVertex muss in mindestens einem Fall True sein
 isIntersectingTriangle :: Triangle -> Double -> Bool
 isIntersectingTriangle (Triangle v1 v2 v3) zSlice = isIntersectingVertex v1 v2 zSlice || isIntersectingVertex v1 v3 zSlice || isIntersectingVertex v2 v3 zSlice
 
-calcIntersecVertex :: Vertex -> Vertex -> Double -> Maybe Vertex
+calcIntersecVertex :: Vertex -> Vertex -> Double -> Maybe (Either (Vertex, Vertex) Vertex)
 calcIntersecVertex v1 v2 zSlice = if isIntersectingVertex v1 v2 zSlice
     then Just $ calcIntersection v1 v2 zSlice
     else Nothing
@@ -33,38 +32,50 @@ calcIntersecVertex v1 v2 zSlice = if isIntersectingVertex v1 v2 zSlice
         calcIntersection v1 v2 zSlice = let zk = max (view zCoord v1) (view zCoord v2)
                                             zj = min (view zCoord v1) (view zCoord v2)
                                             mu = (zSlice - zj) / (zk - zj)
-                                        in if view zCoord v1 > view zCoord v2
-                                            then mapV (*mu) v1 `addV` mapV (*(1-mu)) v2
-                                            else mapV (*mu) v2 `addV` mapV (*(1-mu)) v1
+                                        in if zk == zj
+                                            then Left (v1, v2)
+                                            else if view zCoord v1 > view zCoord v2
+                                                then Right $ mapV (*mu) v1 `addV` mapV (*(1-mu)) v2
+                                                else Right $ mapV (*mu) v2 `addV` mapV (*(1-mu)) v1
 
 calcIntersecTriangle :: Triangle -> Double -> IntersecTriangle
 calcIntersecTriangle t zSlice = calcIntersections t zSlice [] where
     calcIntersections (Triangle v1 v2 v3) zSlice l =
         let l'   = case calcIntersecVertex v1 v2 zSlice of
-                     Just v -> v : l
+                     Just (Left (v1, v2)) -> v1 : v2 : l
+                     Just (Right v) -> v : l
                      Nothing -> l
             l''  = case calcIntersecVertex v1 v3 zSlice of
-                     Just v' -> v' : l'
+                     Just (Left (v1', v2')) -> v1' : v2' : l'
+                     Just (Right v') -> v' : l'
                      Nothing -> l'
             l''' = case calcIntersecVertex v2 v3 zSlice of
-                     Just v'' -> v'' : l''
+                     Just (Left (v1'', v2'')) -> v1'' : v2'' : l''
+                     Just (Right v'') -> v'' : l''
                      Nothing -> l''
-        in IntersecTriangle (Triangle v1 v2 v3) l'''
+        in IntersecTriangle (Triangle v1 v2 v3) (nub l''')
 
 -- calcIntersecTriangles :: [Triangle] -> Double -> [IntersecTriangle]
 -- calcIntersecTriangles = undefined
 
 putConnectionFirst :: Vertex -> IntersecTriangle -> IntersecTriangle
-putConnectionFirst v intTri = intTri & set intersections (v : remove v (view intersections intTri)) where
-    remove _ [] = []
-    remove e xs = [x | x <- xs, x /= e]
+putConnectionFirst v intTri = if v `elem` view intersections intTri
+    then intTri & set intersections (v : remove v (view intersections intTri))
+    else error "The triangle must intersect the slicing plane at the connection vertex."
+
+remove :: Eq a => a -> [a] -> [a]
+remove _ [] = []
+remove e xs = [x | x <- xs, x /= e]
 
 -- Geschlossenen Pfad durch das Sortieren der InterSecTriangles erzeugen
 createCoherentPath :: [IntersecTriangle] -> [IntersecTriangle]
-createCoherentPath intTris = createCoherentPath' intTris [] where
-    createCoherentPath' [] done = done
-    createCoherentPath' (t:ts) [] = createCoherentPath' ts [findConnection t ts [], t]
-    createCoherentPath' todo done = createCoherentPath' (tail todo) (findConnection (head done) todo done : done)
+createCoherentPath [] = []
+createCoherentPath (t:ts) = createCoherentPath' t ts [] where
+    createCoherentPath' curr [] done = findConnection curr [] done : done
+    createCoherentPath' curr todo done = let next = findConnection curr todo done
+                                         in if next `elem` todo
+                                             then createCoherentPath' next (remove next todo) (curr:done)
+                                             else createCoherentPath' (head todo) (tail todo) (next:done)
 
 findConnection :: IntersecTriangle -> [IntersecTriangle] -> [IntersecTriangle] -> IntersecTriangle
 findConnection intTri [] [] = intTri
@@ -73,17 +84,35 @@ findConnection intTri todo done =
     in case find (\e -> start `elem` (e & view intersections)) todo of
         Just dest -> putConnectionFirst start dest
         Nothing -> fromMaybe intTri (find (\e -> start `elem` (e & view intersections)) done)
-{- findConnection intTri todo done = if any $ map (elem (last $ view intersections intTri)) (view traverse.intersections todo) 
-    then find (\e -> elem (last $ view intersections intTri) (e & view intersections))-- get matching intTri from todo
-    else if any $ map (elem (last $ view intersections intTri)) (done.traverse.intersections)
-        then intTri -- get matching intTri from done
-        else intTri -}
+
+separatePaths :: [IntersecTriangle] -> [[IntersecTriangle]]
+separatePaths ts = separatePaths' ts [] [] where
+    separatePaths' [] [] akk = akk
+    separatePaths' [] curr akk = curr : akk
+    separatePaths' (x:xs) curr akk = if x `elem` curr
+        then separatePaths' xs [x] (curr : akk)
+        else separatePaths' xs (x:curr) akk
+
+pathToContour :: [IntersecTriangle] -> [Vertex]
+pathToContour = concatMap (\t -> t & view intersections)
+
+isInnerContourOf :: [Vertex] -> [Vertex] -> Bool
+isInnerContourOf [] _ = True
+isInnerContourOf (x:xs) ref = any ((< view xCoord x) . view xCoord) ref && any ((> view xCoord x) . view xCoord) ref
+
+isInnerContour :: [Vertex] -> [[Vertex]] -> Bool
+isInnerContour _ [] = False
+isInnerContour x cs = or [x `isInnerContourOf` c | c <- cs, x /= c]
+
+classifyContour :: [[Vertex]] -> [Either InnerContour OuterContour]
+classifyContour cs = map (\ x -> if isInnerContour x cs then Left (Inner x) else Right (Outer x)) cs
 
 -- [Triangle] --> filtere intersecting triangles => [Triangle] (length <= input list) --> map calcIntersecTriangle => [IntersecTriangle] => ordnen
--- Fall1: Kein Cluster
--- Fall2: Cluster (3 IntersectingVertices): NOCH NICHT Implementiert
-generateContour :: [Triangle] -> [Either InnerContour OuterContour]
-generateContour = undefined
+
+generateContour :: [Triangle] -> Double -> [Either InnerContour OuterContour]
+generateContour [] _ = []
+generateContour ts zSlice = classifyContour $ map pathToContour (separatePaths $ createCoherentPath $ 
+    filter (\intTri -> length (intTri & view intersections) == 2) (map (`calcIntersecTriangle` zSlice) ts))
 
 -----------------------------------------------------------------
 --Contour Fulfilment : Layer Width, Layer Height als param in main
