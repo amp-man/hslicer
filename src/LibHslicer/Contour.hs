@@ -2,7 +2,7 @@
 
 module LibHslicer.Contour where
 
-import Lib3mf
+import TriangleMesh
 import Control.Lens (over, view, set, (&), makeLenses)
 import Data.Maybe (fromMaybe)
 import Data.List

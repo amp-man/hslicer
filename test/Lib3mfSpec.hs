@@ -1,6 +1,7 @@
 module Lib3mfSpec where
 
 import Lib3mf
+import TriangleMesh
 import Test.Hspec (Spec, describe, context, it, shouldBe)
 
 spec :: Spec
@@ -19,22 +20,6 @@ spec = do
         vertices <- parseVertices path
         triangles <- parseTriangles path vertices
         triangles `shouldBe` mesh
-    it "flips vertex" $
-        vertexFlip (Vertex (-1.0) (-2.0) 0.0) `shouldBe` Vertex 1.0 2.0 0.0
-    it "calculates length of vertex" $
-        vertexLength (Vertex 1.0 2.0 0.0) `shouldBe` sqrt 5
-    it "normalizes vertex" $
-        vertexNormalize (Vertex 3.0 1.0 2.0) `shouldBe` Vertex (3.0/sqrt 14) (1.0/sqrt 14) (2.0/sqrt 14)
-    it "calculates parallelogram diagonal of two convex vertices (vectors turn left)" $
-        vertexDiagonal v1 v2 `shouldBe` Vertex (-1.0) 1.0 0.0
-    it "calculates parallelogram diagonal of two concave vertices (vectors turn right)" $
-        vertexDiagonal v2 v1 `shouldBe` Vertex 1.0 (-1.0) 0.0
-    it "calculates offset normal of two convex vertices (vectors turn left)" $
-        offsetNormal v1 v2 `shouldBe` vertexNormalize v1v2odiag
-    it "calculates offset normal of two convex right angle vertices" $
-        offsetNormal vra1 vra2 `shouldBe` vertexNormalize vradiag
-    it "calculates offset normal of two concave vertices (vectors turn right)" $
-        offsetNormal v2 v1 `shouldBe` vertexNormalize v1v2odiag
 
 vertex_0, vertex_1, vertex_2, vertex_3, vertex_4, vertex_5, vertex_6, vertex_7 :: Vertex
 vertex_0 = Vertex 0.000 0.000 0.000

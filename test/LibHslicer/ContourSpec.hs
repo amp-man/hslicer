@@ -1,7 +1,7 @@
 module LibHslicer.ContourSpec where
 
 import LibHslicer.Contour
-import Lib3mf
+import TriangleMesh
 import Test.Hspec (Spec, describe, context, it, shouldBe)
 import Control.Lens
 

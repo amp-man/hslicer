@@ -29,6 +29,7 @@ library
       LibGcode
       LibHslicer.Contour
       LibHslicer.PlanarSlice
+      TriangleMesh
   other-modules:
       Paths_hslicer
   hs-source-dirs:
@@ -62,6 +63,7 @@ test-suite hslicer-test
       Lib3mfSpec
       LibGcodeSpec
       LibHslicer.ContourSpec
+      TriangleMeshSpec
       Paths_hslicer
   hs-source-dirs:
       test
