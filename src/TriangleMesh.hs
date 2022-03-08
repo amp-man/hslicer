@@ -26,7 +26,7 @@ data Vertex = Vertex {_xCoord, _yCoord, _zCoord :: Double} deriving Show
 data Triangle = Triangle {_vertex1, _vertex2, _vertex3 :: Vertex} deriving (Show)
 
 instance Eq Vertex where
-  (Vertex x1 y1 z1) == (Vertex x2 y2 z2) = x1 == x2 && y1 == y2 && z1 == z2
+    (Vertex x1 y1 z1) == (Vertex x2 y2 z2) = x1 == x2 && y1 == y2 && z1 == z2
 
 instance Eq Triangle where
     (Triangle v1 v2 v3) == (Triangle v1' v2' v3') = v1 == v1' && v2 == v2' && v3 == v3'

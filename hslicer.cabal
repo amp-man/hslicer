@@ -60,6 +60,7 @@ test-suite hslicer-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      IntegrationSpec
       Lib3mfSpec
       LibGcodeSpec
       LibHslicer.ContourSpec
