@@ -38,47 +38,65 @@ spec = do
         intTri8 = IntersecTriangle t8 [Vertex 1.0 0.5 1.0, Vertex 1.0 0.0 1.0] -- zSlice = 1.0
         intTris = [intTri1, intTri2, intTri3, intTri4, intTri5, intTri6, intTri7, intTri8]
         path = [intTri1, intTri2, intTri5, intTri6, intTri7, intTri8, intTri4, intTri3, intTri1]
-    it "detects intersection z1 > z* > z2" $
-       isIntersectingVertex v2 v1 0.5 `shouldBe` True
-    it "detects intersection z2 > z* > z1" $
-       isIntersectingVertex v2 v1 0.5 `shouldBe` True
-    it "detects intersection z1 = z* = z2" $
-       isIntersectingVertex v1 v4 2.0 `shouldBe` True
-    it "detects no intersection" $
-       isIntersectingVertex v1 v2 3.0 `shouldBe` False
-    it "calculates vertex intersection z1 > z* > z2" $
-       calcIntersecVertex v1 v2 0.5 `shouldBe` Just (Right (Vertex 0.0 0.75 0.5))
-    it "calculates vertex intersection z2 > z* > z1" $
-       calcIntersecVertex v2 v1 0.5 `shouldBe` Just (Right (Vertex 0.0 0.75 0.5))
-    it "calculates vertex intersection z1 = z* = z2" $
-       calcIntersecVertex v1 v4 2.0 `shouldBe` Just (Left (v1, v4))
-    it "calculates no vertex intersection" $
-       calcIntersecVertex v1 v2 3.0 `shouldBe` Nothing
-    it "detects triangle intersection 1 point" $
-       isIntersectingTriangle t1 2.0 `shouldBe` True
-    it "detects triangle intersection 2 points" $
-       isIntersectingTriangle t1 0.5 `shouldBe` True
-    it "detects triangle intersection 3 points" $
-       isIntersectingTriangle t11 2.0 `shouldBe` True
-    it "detects no triangle intersection" $
-       isIntersectingTriangle t1 3.0 `shouldBe` False
-    it "calulates triangle intersection 1 point" $
-       calcIntersecTriangle t1 2.0 `shouldBe` IntersecTriangle t1 [v1]
-    it "calculates triangle intersection 2 points" $
-       calcIntersecTriangle t1 1.0 `shouldBe` intTri1
-    it "calculates triangle intersection 3 points" $
-       calcIntersecTriangle t11 2.0 `shouldBe` IntersecTriangle t11 [v1, v4, v6]
-    it "calculates all triangle intersections" $
-       map (`calcIntersecTriangle` 1.0) [t1,t2,t3,t4,t5,t6,t7,t8] `shouldBe` intTris
-    it "calculates all triangle 2 point intersections" $
-       filter (\intTri -> length (intTri & view intersections) == 2) (map (`calcIntersecTriangle` 1.0) mesh) `shouldBe` intTris
-    it "finds connection no done" $
-       findConnection intTri1 (remove intTri1 intTris) [] `shouldBe` intTri2
-    it "finds connection midway" $
-       findConnection intTri2 [intTri3, intTri4, intTri5, intTri6, intTri7, intTri8] [intTri1] `shouldBe` intTri5
-    it "finds connection closing circle (no todo)" $
-       findConnection (IntersecTriangle t3 [Vertex 0.5 0.0 1.0, Vertex 0.0 0.0 1.0]) [] [intTri1, intTri2, intTri5, intTri6, intTri7, intTri8, intTri4] `shouldBe` intTri1
-    it "generates path" $
-       createCoherentPath intTris `shouldBe` reverse path
-    --it "generates contour" $ do
-       --print (generateContour mesh 0.1)
+        contour = Right (Outer [Vertex 0.0 0.0 1.0, Vertex 0.0 0.5 1.0, Vertex 0.0 1.0 1.0, Vertex 0.5 1.0 1.0, Vertex 1.0 1.0 1.0, Vertex 1.0 0.5 1.0, Vertex 1.0 0.0 1.0, Vertex 0.5 0.0 1.0, Vertex 0.0 0.0 1.0])
+    describe "LibHslicer.Contour.isIntersectingVertex" $ do
+       it "detects intersection z1 > z* > z2" $
+          isIntersectingVertex v2 v1 0.5 `shouldBe` True
+       it "detects intersection z2 > z* > z1" $
+          isIntersectingVertex v2 v1 0.5 `shouldBe` True
+       it "detects intersection z1 = z* = z2" $
+          isIntersectingVertex v1 v4 2.0 `shouldBe` True
+       it "detects no intersection" $
+          isIntersectingVertex v1 v2 3.0 `shouldBe` False
+    describe "LibHslicer.Contour.calcIntersecVertex" $ do
+       it "calculates vertex intersection z1 > z* > z2" $
+          calcIntersecVertex v1 v2 0.5 `shouldBe` Just (Right (Vertex 0.0 0.75 0.5))
+       it "calculates vertex intersection z2 > z* > z1" $
+          calcIntersecVertex v2 v1 0.5 `shouldBe` Just (Right (Vertex 0.0 0.75 0.5))
+       it "calculates vertex intersection z1 = z* = z2" $
+          calcIntersecVertex v1 v4 2.0 `shouldBe` Just (Left (v1, v4))
+       it "calculates no vertex intersection" $
+          calcIntersecVertex v1 v2 3.0 `shouldBe` Nothing
+    describe "LibHslicer.Contour.isIntersectingTriangle" $ do
+       it "detects triangle intersection 1 point" $
+          isIntersectingTriangle t1 2.0 `shouldBe` True
+       it "detects triangle intersection 2 points" $
+          isIntersectingTriangle t1 0.5 `shouldBe` True
+       it "detects triangle intersection 3 points" $
+          isIntersectingTriangle t11 2.0 `shouldBe` True
+       it "detects no triangle intersection" $
+          isIntersectingTriangle t1 3.0 `shouldBe` False
+    describe "LibHslicer.Contour.calcIntersecTriangle" $ do
+       it "calulates triangle intersection 1 point" $
+          calcIntersecTriangle t1 2.0 `shouldBe` IntersecTriangle t1 [v1]
+       it "calculates triangle intersection 2 points" $
+          calcIntersecTriangle t1 1.0 `shouldBe` intTri1
+       it "calculates triangle intersection 3 points" $
+          calcIntersecTriangle t11 2.0 `shouldBe` IntersecTriangle t11 [v1, v4, v6]
+       it "calculates no triangle intersection" $
+          calcIntersecTriangle t1 3.0 `shouldBe` IntersecTriangle t1 []
+       it "calculates all triangle intersections" $
+          map (`calcIntersecTriangle` 1.0) [t1,t2,t3,t4,t5,t6,t7,t8] `shouldBe` intTris
+       it "calculates all triangle 2 point intersections" $
+          filter (\intTri -> length (intTri & view intersections) == 2) (map (`calcIntersecTriangle` 1.0) mesh) `shouldBe` intTris
+    describe "LibHslicer.Contour.findConnection" $ do
+       it "finds connection no done" $
+          findConnection intTri1 (remove intTri1 intTris) [] `shouldBe` Just intTri2
+       it "finds connection midway" $
+          findConnection intTri2 [intTri3, intTri4, intTri5, intTri6, intTri7, intTri8] [intTri1] `shouldBe` Just intTri5
+       it "finds connection closing circle (no todo)" $
+          findConnection (IntersecTriangle t3 [Vertex 0.5 0.0 1.0, Vertex 0.0 0.0 1.0]) [] [intTri1, intTri2, intTri5, intTri6, intTri7, intTri8, intTri4] `shouldBe` Just intTri1
+       it "finds no connection" $
+          findConnection intTri1 [intTri4, intTri5, intTri7, intTri8] [] `shouldBe` Nothing
+       it "finds no connection single point" $
+          findConnection intTri1 [] [] `shouldBe` Nothing
+    describe "LibHslicer.Contour.createCoherentPath" $ do
+       it "calculates closed path" $
+          createCoherentPath intTris `shouldBe` reverse path
+       it "calculates open path" $
+          createCoherentPath [intTri1, intTri2, intTri6, intTri7, intTri5] `shouldBe` reverse [intTri1, intTri2, intTri5, intTri6, intTri7]
+       it "calculates unconnected paths" $
+          createCoherentPath [intTri1, intTri2, intTri6, intTri5, intTri3, intTri4, intTri8] `shouldBe` reverse [intTri1, intTri2, intTri5, intTri6, intTri3, intTri4, intTri8]
+    describe "LibHslicer.Contour.generateContour" $ do
+       it "generates contour closed path" $
+          generateContour mesh 1.0 `shouldBe` [contour]

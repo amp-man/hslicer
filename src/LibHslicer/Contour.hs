@@ -8,8 +8,8 @@ import Data.Maybe (fromMaybe)
 import Data.List
 
 data IntersecTriangle = IntersecTriangle {_triangle :: Triangle, _intersections :: [Vertex]} deriving Show
-newtype InnerContour = Inner [Vertex] deriving Show
-newtype OuterContour = Outer [Vertex] deriving Show
+newtype InnerContour = Inner [Vertex] deriving (Show, Eq)
+newtype OuterContour = Outer [Vertex] deriving (Show, Eq)
 
 instance Eq IntersecTriangle where
     (IntersecTriangle t ins) == (IntersecTriangle t' ins') = t == t' && all (`elem` ins') ins && all (`elem` ins) ins'
@@ -71,34 +71,42 @@ remove e xs = [x | x <- xs, x /= e]
 createCoherentPath :: [IntersecTriangle] -> [IntersecTriangle]
 createCoherentPath [] = []
 createCoherentPath (t:ts) = createCoherentPath' t ts [] where
-    createCoherentPath' curr [] done = findConnection curr [] done : done
-    createCoherentPath' curr todo done = let next = findConnection curr todo done
-                                         in if next `elem` todo
-                                             then createCoherentPath' next (remove next todo) (curr:done)
-                                             else createCoherentPath' (head todo) (tail todo) (next:done)
+    createCoherentPath' curr [] done = let conn = findConnection curr [] done
+                                       in case conn of
+                                           Just next -> next : curr : done
+                                           Nothing -> curr : done
+    createCoherentPath' curr todo done = let conn = findConnection curr todo done
+                                         in case conn of
+                                             Just next -> if next `elem` todo
+                                                 then createCoherentPath' next (remove next todo) (curr:done)
+                                                 else createCoherentPath' (head todo) (tail todo) (next:curr:done)
+                                             Nothing -> createCoherentPath' (head todo) (tail todo) (curr:done)
 
-findConnection :: IntersecTriangle -> [IntersecTriangle] -> [IntersecTriangle] -> IntersecTriangle
-findConnection intTri [] [] = intTri
+findConnection :: IntersecTriangle -> [IntersecTriangle] -> [IntersecTriangle] -> Maybe IntersecTriangle
+findConnection intTri [] [] = Nothing
 findConnection intTri todo done =
     let start = last $ view intersections intTri
     in case find (\e -> start `elem` (e & view intersections)) todo of
-        Just dest -> putConnectionFirst start dest
-        Nothing -> fromMaybe intTri (find (\e -> start `elem` (e & view intersections)) done)
+        Just dest -> Just $ putConnectionFirst start dest
+        Nothing -> find (\e -> start `elem` (e & view intersections)) done
 
 separatePaths :: [IntersecTriangle] -> [[IntersecTriangle]]
 separatePaths ts = separatePaths' ts [] [] where
     separatePaths' [] [] akk = akk
     separatePaths' [] curr akk = curr : akk
     separatePaths' (x:xs) curr akk = if x `elem` curr
-        then separatePaths' xs [x] (curr : akk)
+        then separatePaths' xs [] ((x : curr) : akk)
         else separatePaths' xs (x:curr) akk
 
 pathToContour :: [IntersecTriangle] -> [Vertex]
-pathToContour = concatMap (\t -> t & view intersections)
+pathToContour = concatMap (\t -> init $ t & view intersections)
 
 isInnerContourOf :: [Vertex] -> [Vertex] -> Bool
 isInnerContourOf [] _ = True
-isInnerContourOf (x:xs) ref = any ((< view xCoord x) . view xCoord) ref && any ((> view xCoord x) . view xCoord) ref
+isInnerContourOf (x:xs) ref = any ((< view xCoord x) . view xCoord) ref 
+                           && any ((> view xCoord x) . view xCoord) ref 
+                           && any ((< view yCoord x) . view yCoord) ref
+                           && any ((> view yCoord x) . view yCoord) ref
 
 isInnerContour :: [Vertex] -> [[Vertex]] -> Bool
 isInnerContour _ [] = False
