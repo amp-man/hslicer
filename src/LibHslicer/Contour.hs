@@ -122,13 +122,28 @@ generateContour [] _ = []
 generateContour ts zSlice = classifyContour $ map pathToContour (separatePaths $ createCoherentPath $ 
     filter (\intTri -> length (intTri & view intersections) == 2) (map (`calcIntersecTriangle` zSlice) ts))
 
------------------------------------------------------------------
---Contour Fulfilment : Layer Width, Layer Height als param in main
+-- Inspired by Aichholzer et al.(1995),"A novel type of skeleton for polygons": https://www.jucs.org/jucs_1_12/a_novel_type_of/
+-- Assuming anti-clockwise winding of path: Left is inside of contour, right outside
+-- Offset Point is calculated by moving contour point along diagonal of two contour vertices
+-- Negative offset is to inside of contour, Positive to outside
+-- TODO: All Vertices should be Points with 2 Dimensions only
+calculateOffsetForPoint :: Double -> Vertex -> Vertex -> Vertex -> Vertex
+calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
+    where
+        p1p2vec = p2 `addV` vertexFlip p1
+        p2p3vec = p3 `addV` vertexFlip p2
+        offsetnormal = offsetNormal p1p2vec p2p3vec
+        alpha = acos(dot p1p2vec offsetnormal / (vertexLength p1p2vec * vertexLength offsetnormal))
+        b = a / tan alpha
+        diagoffset = signum a * sqrt(a**2 + b**2)
 
-calculateOffset :: [Either InnerContour OuterContour] -> Double
-calculateOffset = undefined
-
---                             main: LineWidth, TriangleMesh -> [Contour]
---                         /                                                               \
--- LineWidth, TriangleMesh                                                                   \
---                         \                                                                  generateGCode -> G91 X0 Y0 G91 X1 Y1 E0.75
+-- TODO: All Vertices should be Points with 2 Dimensions only
+-- TODO: Last POint is possibly at end of list again bc closed contour
+calculateOffsetForContour :: Double -> [Vertex] -> [Vertex]
+calculateOffsetForContour _ [] = []
+calculateOffsetForContour o c@(p1:p2:ps) = calculateOffsetForPoint o (last ps) p1 p2 : calculateOffsetForContour' o (c++[p1])
+      where calculateOffsetForContour' :: Double -> [Vertex] -> [Vertex]
+            calculateOffsetForContour' _ [] = []
+            calculateOffsetForContour' o (p1:p2:p3:ps) = calculateOffsetForPoint o p1 p2 p3 : calculateOffsetForContour' o (p2:p3:ps)
+            calculateOffsetForContour' o _ = []
+calculateOffsetForContour o [p1] = []

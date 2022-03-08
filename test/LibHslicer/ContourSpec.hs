@@ -39,6 +39,10 @@ spec = do
         intTris = [intTri1, intTri2, intTri3, intTri4, intTri5, intTri6, intTri7, intTri8]
         path = [intTri1, intTri2, intTri5, intTri6, intTri7, intTri8, intTri4, intTri3, intTri1]
         contour = Right (Outer [Vertex 0.0 0.0 1.0, Vertex 0.0 0.5 1.0, Vertex 0.0 1.0 1.0, Vertex 0.5 1.0 1.0, Vertex 1.0 1.0 1.0, Vertex 1.0 0.5 1.0, Vertex 1.0 0.0 1.0, Vertex 0.5 0.0 1.0, Vertex 0.0 0.0 1.0])
+        -- TODO: Should be points with 2 Dimensions only
+        rectangle = [Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0, Vertex 0 10 0]
+        -- TODO: Should be points with 2 Dimensions only
+        smallrectangle = [Vertex 1 1 0, Vertex 9 1 0, Vertex 9 9 0, Vertex 1 9 0]
     describe "LibHslicer.Contour.isIntersectingVertex" $ do
        it "detects intersection z1 > z* > z2" $
           isIntersectingVertex v2 v1 0.5 `shouldBe` True
@@ -100,3 +104,17 @@ spec = do
     describe "LibHslicer.Contour.generateContour" $ do
        it "generates contour closed path" $
           generateContour mesh 1.0 `shouldBe` [contour]
+    describe "LibHslicer.Contour.calculateOffsetForPoint" $ do
+       it "offsets a path section Midpoint by -1" $
+          calculateOffsetForPoint (-1) (Vertex 0 0 0) (Vertex 10 0 0) (Vertex 10 10 0) `shouldBe` Vertex 9 1 0
+       it "offsets a path section Midpoint by -2" $
+          calculateOffsetForPoint (-2) (Vertex 0 0 0) (Vertex 10 0 0) (Vertex 10 10 0) `shouldBe` Vertex 8 2 0
+       it "offsets a path section Midpoint by -2" $
+          calculateOffsetForPoint (-2) (Vertex 10 0 0) (Vertex 10 10 0) (Vertex 0 10 0) `shouldBe` Vertex 8 8 0
+       it "offsets a path section Midpoint by -2" $
+          calculateOffsetForPoint (-2) (Vertex 10 10 0) (Vertex 0 10 0) (Vertex 0 0 0) `shouldBe` Vertex 2 8 0
+       it "offsets a path section Midpoint by -1" $
+          calculateOffsetForPoint (-1) (Vertex 10 10 0) (Vertex 0 10 0) (Vertex 0 0 0) `shouldBe` Vertex 1 9 0
+    describe "LibHslicer.Contour.calculateOffsetForContour" $ do   
+       it "offsets a contour by -1" $
+          calculateOffsetForContour (-1) rectangle `shouldBe` smallrectangle
