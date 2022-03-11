@@ -17,11 +17,13 @@ module TriangleMesh (
     vertexLength,
     vertexFlip,
     xyCrossProduct,
-    offsetNormal
+    offsetNormal,
+    meshCeil,
+    meshFloor
     )
     where
 
-import Control.Lens (makeLenses)
+import Control.Lens (makeLenses, view, (&))
 
 data Vertex = Vertex {_xCoord, _yCoord, _zCoord :: Double} deriving Show
 data Triangle = Triangle {_vertex1, _vertex2, _vertex3 :: Vertex} deriving (Show)
@@ -35,7 +37,7 @@ instance Eq Triangle where
 makeLenses ''Vertex
 makeLenses ''Triangle
 
-mapV :: (Double -> Double) -> Vertex -> Vertex 
+mapV :: (Double -> Double) -> Vertex -> Vertex
 mapV f (Vertex x y z) = Vertex (f x) (f y) (f z)
 
 addV :: Vertex -> Vertex -> Vertex
@@ -72,3 +74,20 @@ offsetNormal v1 v2 = vertexNormalize $ flipToRight v1 $ vertexDiagonal v1 v2
 -- Relative Vertices
 flipToRight :: Vertex -> Vertex -> Vertex
 flipToRight v vn = if xyCrossProduct v vn > 0 then vertexFlip vn else vn
+
+
+-- TODO: Swap to Maybe instead of error
+meshCeil :: [Triangle] -> Double
+meshCeil ts = foldr (max . triangleCeil) (triangleCeil (head ts)) (tail ts)
+
+-- TODO: Swap to Maybe instead of error
+triangleCeil :: Triangle -> Double
+triangleCeil t = foldr max (view (vertex1.zCoord) t) [view (vertex2.zCoord) t, view (vertex3.zCoord) t]
+
+-- TODO: Swap to Maybe instead of error
+meshFloor :: [Triangle] -> Double
+meshFloor ts = foldr (min . triangleFloor) (triangleFloor (head ts)) (tail ts)
+
+-- TODO: Swap to Maybe instead of error
+triangleFloor :: Triangle -> Double
+triangleFloor t = foldr min (view (vertex1.zCoord) t) [view (vertex2.zCoord) t, view (vertex3.zCoord) t]

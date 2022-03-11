@@ -1,7 +1,8 @@
 module TriangleMeshSpec where
 
 import TriangleMesh
-import Test.Hspec (Spec, describe, context, it, shouldBe)
+import Test.Hspec (Spec, describe, context, it, shouldBe, shouldThrow, anyErrorCall)
+import Control.Exception (evaluate)
 
 spec :: Spec
 spec = do
@@ -11,6 +12,9 @@ spec = do
         vra1 = Vertex 10 0 0
         vra2 = Vertex 0 10 0
         vradiag = Vertex 1.0 (-1.0) 0.0
+
+        t1 = Triangle (Vertex 0.0 0.0 0.0) (Vertex 0.0 1.0 0.0) (Vertex 1.0 0.0 0.0)
+        t2 = Triangle (Vertex 0.0 0.0 0.0) (Vertex 0.0 1.0 0.0) (Vertex 0.0 0.0 1.0)
     it "flips vertex" $
         vertexFlip (Vertex (-1.0) (-2.0) 0.0) `shouldBe` Vertex 1.0 2.0 0.0
     it "calculates length of vertex" $
@@ -27,3 +31,9 @@ spec = do
         offsetNormal vra1 vra2 `shouldBe` vertexNormalize vradiag
     it "calculates offset normal of two concave vertices (vectors turn right)" $
         offsetNormal v2 v1 `shouldBe` vertexNormalize v1v2odiag
+    it "calculates Ceiling of triangle mesh" $
+        meshCeil [t1, t2] `shouldBe` 1
+    it "calculates floor of triangle mesh" $
+        meshFloor [t1, t2] `shouldBe` 0
+    it "Throws Error on no mesh" $
+        evaluate (meshFloor []) `shouldThrow` anyErrorCall

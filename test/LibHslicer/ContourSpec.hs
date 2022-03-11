@@ -118,10 +118,10 @@ spec = do
           calculateOffsetForPoint (-2) (Vertex 10 10 0) (Vertex 0 10 0) (Vertex 0 0 0) `shouldBe` Vertex 2 8 0
        it "offsets a path section Midpoint by -1" $
           calculateOffsetForPoint (-1) (Vertex 10 10 0) (Vertex 0 10 0) (Vertex 0 0 0) `shouldBe` Vertex 1 9 0
-    describe "LibHslicer.Contour.calculateOffsetForContour" $ do   
+    describe "LibHslicer.Contour.calculateOffsetForContour" $ do
        it "offsets a contour by -1" $
           calculateOffsetForContour (-1) rectangle `shouldBe` smallrectangle
-    describe "LibHslicer.Contour.upperRightVertex" $ do   
+    describe "LibHslicer.Contour.downRightVertex" $ do
        it "gives back most down right vertex" $
           downRightVertex (Vertex 2 0 0) (Vertex 2 1 0) `shouldBe` Vertex 2 0 0
     describe "LibHslicer.Contour.oneVertexOnConvexHull" $ do   

@@ -64,6 +64,7 @@ test-suite hslicer-test
       Lib3mfSpec
       LibGcodeSpec
       LibHslicer.ContourSpec
+      LibHslicer.PlanarSliceSpec
       TriangleMeshSpec
       Paths_hslicer
   hs-source-dirs:

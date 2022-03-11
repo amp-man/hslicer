@@ -57,7 +57,7 @@ calcIntersecTriangle t zSlice = calcIntersections t zSlice [] where
 
 -- calcIntersecTriangles :: [Triangle] -> Double -> [IntersecTriangle]
 -- calcIntersecTriangles = undefined
-
+-- TODO: Swap to Maybe instead of error
 putConnectionFirst :: Vertex -> IntersecTriangle -> IntersecTriangle
 putConnectionFirst v intTri = if v `elem` view intersections intTri
     then intTri & set intersections (v : remove v (view intersections intTri))
@@ -119,10 +119,10 @@ downRightVertex :: Vertex -> Vertex -> Vertex
 downRightVertex v1@(Vertex x1 y1 _) v2@(Vertex x2 y2 _) = if (y1 < y2)
                                                         || (y1 == y2 && x1 > x2) then v1 else v2
 
+-- TODO: Swap to Maybe instead of error
 oneVertexOnConvexHull :: [Vertex] -> Vertex
 oneVertexOnConvexHull [] = error "No Vertices in List"
-oneVertexOnConvexHull [x] = x
-oneVertexOnConvexHull (x:xs) = downRightVertex x (oneVertexOnConvexHull xs)
+oneVertexOnConvexHull (x:xs) = foldr downRightVertex x xs
 
 -- Inspired by: http://www.faqs.org/faqs/graphics/algorithms-faq/ "How do I find the orientation of a simple polygon?"
 -- Hier wird schon angenommen dass der Anfangspunkt am Anfang UND Ende in [Vertex] ist
@@ -134,13 +134,9 @@ hasCCWWinding c = hasCCWWinding' pointOnConvexHull c
         hasCCWWinding' _ [] = False
         hasCCWWinding' chv (p1:p2:p3:ps) = if p2 == chv
                                             then xyCrossProduct (p1 `addV` vertexFlip p2) (p3 `addV` vertexFlip p2) < 0
-                                            -- TODO: Elegantere Lösung finden??
-                                            else hasCCWWinding' chv (p3:ps++[p2])
+                                            -- TODO: Elegantere Lösung finden?? terminiert nicht??
+                                            else hasCCWWinding' chv (p2:p3:ps++[p2])
         hasCCWWinding' _ _ = False
-           -- Warum geht das nicht?
-           -- where
-             --   p2p1vec = p1 `addV` vertexFlip p2
-               -- p2p3vec = p3 `addV` vertexFlip p2
 
 makeContourCCW :: [Vertex] -> [Vertex]
 makeContourCCW c = if not $ hasCCWWinding c then reverse c else c
