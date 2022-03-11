@@ -16,6 +16,7 @@ module TriangleMesh (
     vertexDiagonal,
     vertexLength,
     vertexFlip,
+    xyCrossProduct,
     offsetNormal
     )
     where

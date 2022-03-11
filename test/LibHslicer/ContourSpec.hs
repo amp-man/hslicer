@@ -39,10 +39,13 @@ spec = do
         intTris = [intTri1, intTri2, intTri3, intTri4, intTri5, intTri6, intTri7, intTri8]
         path = [intTri1, intTri2, intTri5, intTri6, intTri7, intTri8, intTri4, intTri3, intTri1]
         contour = Right (Outer [Vertex 0.0 0.0 1.0, Vertex 0.0 0.5 1.0, Vertex 0.0 1.0 1.0, Vertex 0.5 1.0 1.0, Vertex 1.0 1.0 1.0, Vertex 1.0 0.5 1.0, Vertex 1.0 0.0 1.0, Vertex 0.5 0.0 1.0, Vertex 0.0 0.0 1.0])
-        -- TODO: Should be points with 2 Dimensions only
         rectangle = [Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0, Vertex 0 10 0]
-        -- TODO: Should be points with 2 Dimensions only
         smallrectangle = [Vertex 1 1 0, Vertex 9 1 0, Vertex 9 9 0, Vertex 1 9 0]
+        
+        -- Hier wird schon angenommen dass der Anfangspunkt am Anfang UND Ende enthalten ist
+        rectangle1 = [Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0, Vertex 0 10 0, Vertex 0 0 0]
+        rotatedrectangle = [Vertex 10 10 0, Vertex 0 10 0, Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0]
+
     describe "LibHslicer.Contour.isIntersectingVertex" $ do
        it "detects intersection z1 > z* > z2" $
           isIntersectingVertex v2 v1 0.5 `shouldBe` True
@@ -118,3 +121,29 @@ spec = do
     describe "LibHslicer.Contour.calculateOffsetForContour" $ do   
        it "offsets a contour by -1" $
           calculateOffsetForContour (-1) rectangle `shouldBe` smallrectangle
+    describe "LibHslicer.Contour.upperRightVertex" $ do   
+       it "gives back most down right vertex" $
+          downRightVertex (Vertex 2 0 0) (Vertex 2 1 0) `shouldBe` Vertex 2 0 0
+    describe "LibHslicer.Contour.oneVertexOnConvexHull" $ do   
+       it "gives back one random point on convex hull of contour" $
+          oneVertexOnConvexHull rectangle `shouldBe` Vertex 10 0 0
+       it "gives back one random point on convex hull of contour" $
+          oneVertexOnConvexHull rotatedrectangle `shouldBe` Vertex 10 0 0
+    describe "LibHslicer.Contour.hasCCWWinding" $ do   
+       it "Returns True if Contour has CCW Winding Direction" $
+          hasCCWWinding rectangle1 `shouldBe` True
+       it "Returns False if Contour has CW Winding Direction" $
+          hasCCWWinding (reverse rectangle1) `shouldBe` False
+       it "Returns True if Contour with most down right point not in first spot has CCW Winding Direction" $
+          hasCCWWinding rotatedrectangle `shouldBe` True
+       it "Returns False if Contour with most down right point not in first spot has CW Winding Direction" $
+          hasCCWWinding (reverse rotatedrectangle) `shouldBe` False
+    describe "LibHslicer.Contour.makeContourCCW" $ do   
+       it "CCW Winding Direction stays CCW" $
+          makeContourCCW rectangle1 `shouldBe` rectangle1
+       it "CW Winding Direction of rectangle becomes CCW" $
+          makeContourCCW (reverse rectangle1) `shouldBe` rectangle1
+       it "CCW Winding Direction stays CCW" $
+          makeContourCCW rotatedrectangle `shouldBe` rotatedrectangle
+       it "CW Winding Direction of rectangle becomes CCW" $
+          makeContourCCW (reverse rotatedrectangle) `shouldBe` rotatedrectangle

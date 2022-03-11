@@ -103,8 +103,8 @@ pathToContour = concatMap (\t -> init $ t & view intersections)
 
 isInnerContourOf :: [Vertex] -> [Vertex] -> Bool
 isInnerContourOf [] _ = True
-isInnerContourOf (x:xs) ref = any ((< view xCoord x) . view xCoord) ref 
-                           && any ((> view xCoord x) . view xCoord) ref 
+isInnerContourOf (x:xs) ref = any ((< view xCoord x) . view xCoord) ref
+                           && any ((> view xCoord x) . view xCoord) ref
                            && any ((< view yCoord x) . view yCoord) ref
                            && any ((> view yCoord x) . view yCoord) ref
 
@@ -115,18 +115,47 @@ isInnerContour x cs = or [x `isInnerContourOf` c | c <- cs, x /= c]
 classifyContour :: [[Vertex]] -> [Either InnerContour OuterContour]
 classifyContour cs = map (\ x -> if isInnerContour x cs then Left (Inner x) else Right (Outer x)) cs
 
+downRightVertex :: Vertex -> Vertex -> Vertex
+downRightVertex v1@(Vertex x1 y1 _) v2@(Vertex x2 y2 _) = if (y1 < y2)
+                                                        || (y1 == y2 && x1 > x2) then v1 else v2
+
+oneVertexOnConvexHull :: [Vertex] -> Vertex
+oneVertexOnConvexHull [] = error "No Vertices in List"
+oneVertexOnConvexHull [x] = x
+oneVertexOnConvexHull (x:xs) = downRightVertex x (oneVertexOnConvexHull xs)
+
+-- Inspired by: http://www.faqs.org/faqs/graphics/algorithms-faq/ "How do I find the orientation of a simple polygon?"
+-- Hier wird schon angenommen dass der Anfangspunkt am Anfang UND Ende in [Vertex] ist
+hasCCWWinding :: [Vertex] -> Bool
+hasCCWWinding c = hasCCWWinding' pointOnConvexHull c
+    where
+        pointOnConvexHull = oneVertexOnConvexHull c
+        hasCCWWinding' :: Vertex -> [Vertex] -> Bool
+        hasCCWWinding' _ [] = False
+        hasCCWWinding' chv (p1:p2:p3:ps) = if p2 == chv
+                                            then xyCrossProduct (p1 `addV` vertexFlip p2) (p3 `addV` vertexFlip p2) < 0
+                                            -- TODO: Elegantere Lösung finden??
+                                            else hasCCWWinding' chv (p3:ps++[p2])
+        hasCCWWinding' _ _ = False
+           -- Warum geht das nicht?
+           -- where
+             --   p2p1vec = p1 `addV` vertexFlip p2
+               -- p2p3vec = p3 `addV` vertexFlip p2
+
+makeContourCCW :: [Vertex] -> [Vertex]
+makeContourCCW c = if not $ hasCCWWinding c then reverse c else c
+
 -- [Triangle] --> filtere intersecting triangles => [Triangle] (length <= input list) --> map calcIntersecTriangle => [IntersecTriangle] => ordnen
 
 generateContour :: [Triangle] -> Double -> [Either InnerContour OuterContour]
 generateContour [] _ = []
-generateContour ts zSlice = classifyContour $ map pathToContour (separatePaths $ createCoherentPath $ 
+generateContour ts zSlice = classifyContour $ map pathToContour (separatePaths $ createCoherentPath $
     filter (\intTri -> length (intTri & view intersections) == 2) (map (`calcIntersecTriangle` zSlice) ts))
 
 -- Inspired by Aichholzer et al.(1995),"A novel type of skeleton for polygons": https://www.jucs.org/jucs_1_12/a_novel_type_of/
 -- Assuming anti-clockwise winding of path: Left is inside of contour, right outside
 -- Offset Point is calculated by moving contour point along diagonal of two contour vertices
 -- Negative offset is to inside of contour, Positive to outside
--- TODO: All Vertices should be Points with 2 Dimensions only
 calculateOffsetForPoint :: Double -> Vertex -> Vertex -> Vertex -> Vertex
 calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
     where
@@ -137,8 +166,7 @@ calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
         b = a / tan alpha
         diagoffset = signum a * sqrt(a**2 + b**2)
 
--- TODO: All Vertices should be Points with 2 Dimensions only
--- TODO: Last POint is possibly at end of list again bc closed contour
+-- TODO: Hier wird NOCH NICHT angenommen dass der Anfangspunkt am Anfang UND Ende in [Vertex] ist
 calculateOffsetForContour :: Double -> [Vertex] -> [Vertex]
 calculateOffsetForContour _ [] = []
 calculateOffsetForContour o c@(p1:p2:ps) = calculateOffsetForPoint o (last ps) p1 p2 : calculateOffsetForContour' o (c++[p1])
