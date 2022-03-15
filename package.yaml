@@ -24,6 +24,7 @@ dependencies:
 - xml-conduit
 - text
 - lens
+- QuickCheck
 
 library:
   source-dirs: src

@@ -35,7 +35,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      QuickCheck
+    , base >=4.7 && <5
     , lens
     , text
     , xml-conduit
@@ -49,7 +50,8 @@ executable hslicer-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      QuickCheck
+    , base >=4.7 && <5
     , hslicer
     , lens
     , text
@@ -60,6 +62,8 @@ test-suite hslicer-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Examples.Box
+      Examples.RealCuboid
       IntegrationSpec
       Lib3mfSpec
       LibGcodeSpec
@@ -71,7 +75,8 @@ test-suite hslicer-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      QuickCheck
+    , base >=4.7 && <5
     , hslicer
     , hspec
     , lens
