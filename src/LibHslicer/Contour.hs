@@ -171,3 +171,8 @@ calculateOffsetForContour o c@(p1:p2:ps) = calculateOffsetForPoint o (last ps) p
             calculateOffsetForContour' o (p1:p2:p3:ps) = calculateOffsetForPoint o p1 p2 p3 : calculateOffsetForContour' o (p2:p3:ps)
             calculateOffsetForContour' o _ = []
 calculateOffsetForContour o [p1] = []
+
+calculateOffsetInnerOuter :: Double -> [Either InnerContour OuterContour] -> [Vertex]
+calculateOffsetInnerOuter o ((Left (Inner c)):cs) = calculateOffsetForContour (o*(-1)) c ++ calculateOffsetInnerOuter o cs
+calculateOffsetInnerOuter o ((Right (Outer c)):cs) = calculateOffsetForContour o c ++ calculateOffsetInnerOuter o cs
+calculateOffsetInnerOuter _ [] = []

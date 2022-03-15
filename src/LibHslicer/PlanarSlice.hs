@@ -7,24 +7,47 @@ import LibGcode
 import LibHslicer.Contour
 import Control.Lens
 
+type Unit = (Double, String)
+
 -- Düsengröße, Slice-Höhe,...
-data SliceParams = SParams { _sliceHeight, _nozzleWidth::Double } deriving Show
-sParamsDefault = SParams { _sliceHeight = 0.2, _nozzleWidth = 0.4 }
+data NozzleAttrib = NAttrib { _nozzleWidth, _maxExtrusionAmount::Unit} deriving Show
+data SliceParams = SParams { _sliceHeight::Unit, _filamentwidth::Unit, _nozzleAttributes::NozzleAttrib } deriving Show
+nAttribDefault = NAttrib { _nozzleWidth = (0.4,"mm"), _maxExtrusionAmount = (0.2,"mm3/s")}
+sParamsDefault = SParams { _sliceHeight = (0.2,"mm"), _filamentwidth = (1.75,"mm"), _nozzleAttributes = nAttribDefault }
 
 -- Pro Pfadsegment: Extrusionsvolumen, Geschwindigkeit,...
-data PrintParams = PParams {_extVolume, _speed :: Double} deriving Show
+data PrintParams = PParams {_extVolume, _speed :: Unit} deriving Show
 
 data Combination = Comb {_position :: Vertex, _physics :: PrintParams} deriving Show
 
 makeLenses ''SliceParams
+makeLenses ''NozzleAttrib
 makeLenses ''PrintParams
 makeLenses ''Combination
 
-sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
-sliceMesh m sp = undefined 
+-- Calculate Extrusion Amount per Combination and adjust speed to not exceed maxExtrusionAmount
+maxExtrusionBarrier :: [[Combination]] -> [[Combination]]
+maxExtrusionBarrier = undefined
+
+-- sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
+-- sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (-0.2)) (sliceContours m sp)) sp
+
+-- toGCmd :: [[Combination]] -> [GCmd]
+-- toGCmd cs = over each over (each % position ) cs
+
+calcMotorDistance :: Unit -> Unit -> Double
+calcMotorDistance = undefined
+
+printPrep :: [[Vertex]] -> SliceParams -> [[Combination]]
+-- printPrep cs sp = map (\ x -> x ^.. (each . folding (\v -> return (Comb v (calcExtrVol v sp)) :: [Combination]))) cs
+printPrep cs sp = over each (\ x -> x ^.. (each . folding (\v -> return (Comb v (calcExtrVol v sp)) :: [Combination]))) cs
+--printPrep cs sp = over (traverse . each) (\v -> return (Comb v (calcExtrVol v sp))) cs
+
+calcExtrVol :: Vertex -> SliceParams -> PrintParams
+calcExtrVol = undefined
 
 sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
-sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view sliceHeight sp) (meshCeil m))
+sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m))
 
 calcSliceOffsets :: Double -> Double -> Double -> [Double]
 calcSliceOffsets ch sh mh
