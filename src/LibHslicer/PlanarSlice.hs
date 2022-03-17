@@ -2,7 +2,7 @@
 
 module LibHslicer.PlanarSlice where
 
-import TriangleMesh ( Vertex, Triangle, meshFloor, meshCeil )
+import TriangleMesh
 import LibGcode
 import LibHslicer.Contour
 import Control.Lens
@@ -11,12 +11,12 @@ type Unit = (Double, String)
 
 -- Düsengröße, Slice-Höhe,...
 data NozzleAttrib = NAttrib { _nozzleWidth, _maxExtrusionAmount::Unit} deriving Show
-data SliceParams = SParams { _sliceHeight::Unit, _filamentwidth::Unit, _nozzleAttributes::NozzleAttrib } deriving Show
+data SliceParams = SParams { _sliceHeight::Unit, _speed::Unit, _filamentWidth::Unit, _nozzleAttributes::NozzleAttrib } deriving Show
 nAttribDefault = NAttrib { _nozzleWidth = (0.4,"mm"), _maxExtrusionAmount = (0.2,"mm3/s")}
-sParamsDefault = SParams { _sliceHeight = (0.2,"mm"), _filamentwidth = (1.75,"mm"), _nozzleAttributes = nAttribDefault }
+sParamsDefault = SParams { _sliceHeight = (0.2,"mm"), _speed = (20,"mm/s"), _filamentWidth = (1.75,"mm"), _nozzleAttributes = nAttribDefault }
 
 -- Pro Pfadsegment: Extrusionsvolumen, Geschwindigkeit,...
-data PrintParams = PParams {_extVolume, _speed :: Unit} deriving Show
+data PrintParams = PParams {_extMove, _speed :: Unit} deriving Show
 
 data Combination = Comb {_position :: Vertex, _physics :: PrintParams} deriving Show
 
@@ -32,8 +32,8 @@ maxExtrusionBarrier = undefined
 -- sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
 -- sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (-0.2)) (sliceContours m sp)) sp
 
--- toGCmd :: [[Combination]] -> [GCmd]
--- toGCmd cs = over each cs
+toGCmd :: [[Combination]] -> [GCmd]
+toGCmd cs = cs ^.. (each. each . folding (\c -> return AbsProgr [("X", c ^. (position.xCoord)), ("Y",c ^. (position.yCoord)), ("Z",c ^. (position.zCoord)), ("E",c ^. (physics.extMove._1))]))
 
 calcMotorDistance :: Unit -> Unit -> Double
 calcMotorDistance (ev,evu) (fw,fwu) = let fa = pi * (fw/2)^2
@@ -41,11 +41,13 @@ calcMotorDistance (ev,evu) (fw,fwu) = let fa = pi * (fw/2)^2
 
 printPrep :: [[Vertex]] -> SliceParams -> [[Combination]]
 -- printPrep cs sp = map (\ x -> x ^.. (each . folding (\v -> return (Comb v (calcExtrVol v sp)) :: [Combination]))) cs
-printPrep cs sp = over each (\ x -> x ^.. (each . folding (\v -> return (Comb v (calcExtrVol v sp)) :: [Combination]))) cs
+printPrep cs sp = let neighbours = zip cs (tail cs)
+                      pparams = PParams{_extmove = calcMotorDistance (calcExtrVol v sp) (sp^.filamentWidth._1), _speed= sp ^. speed._1}
+                  in over each (\ x -> x ^.. (each . folding (\v -> return (Comb v pparams)) :: [Combination])) cs
 --printPrep cs sp = over (traverse . each) (\v -> return (Comb v (calcExtrVol v sp))) cs
 
-calcExtrVol :: Vertex -> SliceParams -> PrintParams
-calcExtrVol = undefined
+calcExtrVol :: Vertex -> Vertex -> SliceParams -> Double
+calcExtrVol v1 v2 sp = (vectorDistance v1 v2) * (sp ^. nozzleAttributes.nozzleWidth) * (sp ^. sliceHeight)
 
 sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
 sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m))
