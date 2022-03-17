@@ -55,7 +55,6 @@ calcSliceOffsets ch sh mh
         | ch >= mh = [mh]
         | otherwise = ch : calcSliceOffsets (ch+sh) sh mh
 
-
 -- sParamsTest = SParams {_sliceHeight=0.5, _nozzleWidth=0.6}
 
 -- params = set sliceHeight 0.2 pParamDefault
