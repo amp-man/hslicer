@@ -18,6 +18,7 @@ module TriangleMesh (
     vertexFlip,
     xyCrossProduct,
     offsetNormal,
+    vertexDistance,
     meshCeil,
     meshFloor
     )
@@ -77,6 +78,9 @@ offsetNormal v1 v2 = vertexNormalize $ flipToRight v1 $ vertexDiagonal v1 v2
 flipToRight :: Vertex -> Vertex -> Vertex
 flipToRight v vn = if xyCrossProduct v vn > 0 then vertexFlip vn else vn
 
+-- calculate distance between vertices
+vertexDistance :: Vertex -> Vertex -> Double 
+vertexDistance (Vertex x1 y1 z1) (Vertex x2 y2 z2) = sqrt $ (x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2
 
 -- TODO: Swap to Maybe instead of error
 meshCeil :: [Triangle] -> Double
