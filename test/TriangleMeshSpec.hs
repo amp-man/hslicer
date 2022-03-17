@@ -56,7 +56,7 @@ spec = do
             \x y z -> let v = Vertex x y z
                           l = vertexLength v
                       in vertexNormalize v `shouldBe` if v == Vertex 0 0 0
-                                                        then Vertex 0 0 0
+                                                        then v
                                                         else Vertex (x/l) (y/l) (z/l)
     
     describe "TriangleMesh.vertexDiagonal" $ do

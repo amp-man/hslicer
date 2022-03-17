@@ -55,7 +55,7 @@ xyCrossProduct (Vertex x1 y1 _) (Vertex x2 y2 _) = x1*y2-y1*x2
 
 vertexNormalize :: Vertex -> Vertex
 vertexNormalize v@(Vertex x y z)
-    | v == Vertex 0 0 0 = Vertex 0 0 0
+    | v == Vertex 0 0 0 = v
     | otherwise = Vertex (x/vlength) (y/vlength) (z/vlength)
         where vlength = vertexLength v
 
