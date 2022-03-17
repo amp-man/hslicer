@@ -54,8 +54,10 @@ xyCrossProduct :: Vertex -> Vertex -> Double
 xyCrossProduct (Vertex x1 y1 _) (Vertex x2 y2 _) = x1*y2-y1*x2
 
 vertexNormalize :: Vertex -> Vertex
-vertexNormalize v@(Vertex x y z) = Vertex (x/vlength) (y/vlength) (z/vlength)
-    where vlength = vertexLength v
+vertexNormalize v@(Vertex x y z)
+    | v == Vertex 0 0 0 = Vertex 0 0 0
+    | otherwise = Vertex (x/vlength) (y/vlength) (z/vlength)
+        where vlength = vertexLength v
 
 vertexFlip :: Vertex -> Vertex
 vertexFlip = mapV (*(-1))

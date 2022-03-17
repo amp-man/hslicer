@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module TriangleMeshSpec where
 
 import TriangleMesh
@@ -54,7 +55,9 @@ spec = do
           property $
             \x y z -> let v = Vertex x y z
                           l = vertexLength v
-                      in vertexNormalize v `shouldBe` Vertex (x/l) (y/l) (z/l)
+                      in vertexNormalize v `shouldBe` if v == Vertex 0 0 0
+                                                        then Vertex 0 0 0
+                                                        else Vertex (x/l) (y/l) (z/l)
     
     describe "TriangleMesh.vertexDiagonal" $ do
         it "calculates parallelogram diagonal of two convex vertices (vectors turn left)" $
