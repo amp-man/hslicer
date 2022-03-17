@@ -70,6 +70,10 @@ spec = do
         it "calculates offset normal of two concave vertices (vectors turn right)" $
             offsetNormal v2 v1 `shouldBe` vertexNormalize v1v2odiag
     
+    describe "TriangleMesh.vertexDistance" $ do
+        it "calculates distance between vertices" $
+            vertexDistance v1 v2 `shouldBe` sqrt 2
+    
     describe "TriangleMesh.meshCeil" $ do
         it "calculates Ceiling of triangle mesh" $
             meshCeil [t1, t2] `shouldBe` 1
