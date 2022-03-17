@@ -33,10 +33,11 @@ maxExtrusionBarrier = undefined
 -- sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (-0.2)) (sliceContours m sp)) sp
 
 -- toGCmd :: [[Combination]] -> [GCmd]
--- toGCmd cs = over each over (each % position ) cs
+-- toGCmd cs = over each cs
 
 calcMotorDistance :: Unit -> Unit -> Double
-calcMotorDistance = undefined
+calcMotorDistance (ev,evu) (fw,fwu) = let fa = pi * (fw/2)^2
+                                        in ev/fa
 
 printPrep :: [[Vertex]] -> SliceParams -> [[Combination]]
 -- printPrep cs sp = map (\ x -> x ^.. (each . folding (\v -> return (Comb v (calcExtrVol v sp)) :: [Combination]))) cs
