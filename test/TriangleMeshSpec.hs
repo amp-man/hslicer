@@ -59,10 +59,12 @@ spec = do
                                                         else Vertex (x/l) (y/l) (z/l)
     
     describe "TriangleMesh.vertexDiagonal" $ do
-        it "calculates parallelogram diagonal of two convex vertices (vectors turn left)" $
+        it "calculates diagonal of two convex vertices (vectors turn left)" $
             vertexDiagonal v1 v2 `shouldBe` Vertex (-1.0) 1.0 0.0
-        it "calculates parallelogram diagonal of two concave vertices (vectors turn right)" $
+        it "calculates diagonal of two concave vertices (vectors turn right)" $
             vertexDiagonal v2 v1 `shouldBe` Vertex 1.0 (-1.0) 0.0
+        it "calculates diagonal of two colinear vertices" $
+            vertexDiagonal (Vertex 0 (-1) 0) (Vertex 0 1 0) `shouldBe` Vertex (-1) 0 0
     
     describe "TriangleMesh.offsetNormal" $ do
         it "calculates offset normal of two convex vertices (vectors turn left)" $
@@ -71,6 +73,8 @@ spec = do
             offsetNormal vra1 vra2 `shouldBe` vertexNormalize vradiag
         it "calculates offset normal of two concave vertices (vectors turn right)" $
             offsetNormal v2 v1 `shouldBe` vertexNormalize v1v2odiag
+        it "calculates offset normal of two colinear vertices" $
+            offsetNormal (Vertex 0 (-1) 0) (Vertex 0 1 0) `shouldBe` Vertex (-1) 0 0
     
     describe "TriangleMesh.vertexDistance" $ do
         it "calculates distance between vertices" $

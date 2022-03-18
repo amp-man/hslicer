@@ -164,16 +164,15 @@ calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
         diagoffset = signum a * sqrt(a**2 + b**2)
 
 calculateOffsetForContour :: Double -> [Vertex] -> [Vertex]
-calculateOffsetForContour _ [] = []
 calculateOffsetForContour o c@(p1:p2:ps) = let offsetp1 = calculateOffsetForPoint o (last $ init ps) p1 p2 
                                            in offsetp1 : calculateOffsetForContour' o c ++ [offsetp1]
       where calculateOffsetForContour' :: Double -> [Vertex] -> [Vertex]
             calculateOffsetForContour' _ [] = []
             calculateOffsetForContour' o (p1:p2:p3:ps) = calculateOffsetForPoint o p1 p2 p3 : calculateOffsetForContour' o (p2:p3:ps)
-            calculateOffsetForContour' o _ = []
-calculateOffsetForContour o [p1] = []
+            calculateOffsetForContour' _ _ = []
+calculateOffsetForContour _ _ = []
 
 calculateOffsetInnerOuter :: Double -> [Either InnerContour OuterContour] -> [Vertex]
 calculateOffsetInnerOuter o ((Left (Inner c)):cs) = calculateOffsetForContour (o*(-1)) c ++ calculateOffsetInnerOuter o cs
 calculateOffsetInnerOuter o ((Right (Outer c)):cs) = calculateOffsetForContour o c ++ calculateOffsetInnerOuter o cs
-calculateOffsetInnerOuter _ [] = []
+calculateOffsetInnerOuter _ _ = []

@@ -28,7 +28,7 @@ makeLenses ''Combination
 
 
 sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
-sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (0)) (sliceContours m sp)) sp
+sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (-1)) (sliceContours m sp)) sp
 
 sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
 sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m))

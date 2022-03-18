@@ -24,7 +24,7 @@ module TriangleMesh (
     )
     where
 
-import Control.Lens (makeLenses, view, (&))
+import Control.Lens
 
 data Vertex = Vertex {_xCoord, _yCoord, _zCoord :: Double} deriving Show
 data Triangle = Triangle {_vertex1, _vertex2, _vertex3 :: Vertex} deriving (Show)
@@ -63,10 +63,14 @@ vertexNormalize v@(Vertex x y z)
 vertexFlip :: Vertex -> Vertex
 vertexFlip = mapV (*(-1))
 
+parallelToVec :: Vertex -> Vertex -> Bool
+parallelToVec v1 v2 = xyCrossProduct v1 v2 == 0
+
 -- According to parallelogram addition Rules
 -- Relative Vertices
 vertexDiagonal :: Vertex -> Vertex -> Vertex
-vertexDiagonal v1 v2 = vertexFlip v1 `addV` v2
+vertexDiagonal v1 v2 |v1 `parallelToVec` v2 = Vertex (v1^.yCoord) (mapV (*(-1)) v1^.xCoord) (v1^.zCoord)
+                     |otherwise = vertexFlip v1 `addV` v2
 
 -- Assuming anti-clockwise winding of Path
 -- Relative Vertices

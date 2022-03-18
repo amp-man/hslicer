@@ -8,10 +8,11 @@ import Examples.Box
 
 spec :: Spec
 spec = do
-    let rectangle = [Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0, Vertex 0 10 0]
-        smallrectangle = [Vertex 1 1 0, Vertex 9 1 0, Vertex 9 9 0, Vertex 1 9 0]
-        -- Hier wird schon angenommen dass der Anfangspunkt am Anfang UND Ende enthalten ist
-        rectangle1 = [Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0, Vertex 0 10 0, Vertex 0 0 0]
+    let
+        rectangle = [Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0, Vertex 0 10 0, Vertex 0 0 0]
+        rectangle_offset1 = [Vertex 1 1 0, Vertex 9 1 0, Vertex 9 9 0, Vertex 1 9 0, Vertex 1 1 0]
+        testpath = [Vertex 0.100005 20.007000 0.000000, Vertex 0.200000 0.399980 0.000000, Vertex 10.003995 0.200000 0.000000, Vertex 9.904000 19.807020 0.000000, Vertex 0.100005 20.007000 0.000000]
+        testpath1 = [Vertex 0.000000 0.133344 0.200000, Vertex 0.000000 0.000000 0.200000, Vertex 10.037325 0.000000 0.200000, Vertex 10.104000 0.000000 0.200000, Vertex 10.104000 20.073656 0.200000, Vertex 10.104000 20.207000 0.200000, Vertex 0.066675 20.207000 0.200000, Vertex 0.000000 20.207000 0.200000, Vertex 0.000000 0.133344 0.200000]
         rotatedrectangle = [Vertex 10 10 0, Vertex 0 10 0, Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0]
 
     describe "LibHslicer.Contour.isIntersectingVertex" $ do
@@ -83,20 +84,28 @@ spec = do
           generateContour boxMesh 1.0 `shouldBe` [contour]
 
     describe "LibHslicer.Contour.calculateOffsetForPoint" $ do
-       it "offsets a path section Midpoint by -1" $
+       it "offsets a path midpoint by -1" $
           calculateOffsetForPoint (-1) (Vertex 0 0 0) (Vertex 10 0 0) (Vertex 10 10 0) `shouldBe` Vertex 9 1 0
-       it "offsets a path section Midpoint by -2" $
+       it "offsets a path midpoint by -2" $
           calculateOffsetForPoint (-2) (Vertex 0 0 0) (Vertex 10 0 0) (Vertex 10 10 0) `shouldBe` Vertex 8 2 0
-       it "offsets a path section Midpoint by -2" $
+       it "offsets a path midpoint by -2" $
           calculateOffsetForPoint (-2) (Vertex 10 0 0) (Vertex 10 10 0) (Vertex 0 10 0) `shouldBe` Vertex 8 8 0
-       it "offsets a path section Midpoint by -2" $
+       it "offsets a path midpoint by -2" $
           calculateOffsetForPoint (-2) (Vertex 10 10 0) (Vertex 0 10 0) (Vertex 0 0 0) `shouldBe` Vertex 2 8 0
-       it "offsets a path section Midpoint by -1" $
+       it "offsets a path midpoint by -1" $
           calculateOffsetForPoint (-1) (Vertex 10 10 0) (Vertex 0 10 0) (Vertex 0 0 0) `shouldBe` Vertex 1 9 0
+       it "offsets a path midpoint 90 degrees on colinear segment" $
+         calculateOffsetForPoint (-1) (Vertex 0 10 0) (Vertex 0 1 0) (Vertex 0 0 0) `shouldBe` Vertex 1 1 0
+       it "offsets problematic path section by -1" $
+          calculateOffsetForPoint (-1) (last $ init testpath1) (head testpath1) (testpath1!!1) `shouldBe` Vertex 1.000000 0.133344 0.200000
 
     describe "LibHslicer.Contour.calculateOffsetForContour" $ do
        it "offsets a contour by -1" $
-          calculateOffsetForContour (-1) rectangle `shouldBe` smallrectangle
+          calculateOffsetForContour (-1) rectangle `shouldBe` rectangle_offset1
+       --it "offsets a contour by -11" $
+         -- print $ calculateOffsetForContour (-11) rectangle 
+       --it "offsets testpath by -1" $
+           --print $ calculateOffsetForContour (-1) testpath1
 
     describe "LibHslicer.Contour.downRightVertex" $ do
        it "gives back most down right vertex" $
@@ -110,9 +119,9 @@ spec = do
 
     describe "LibHslicer.Contour.hasCCWWinding" $ do   
        it "Returns True if Contour has CCW Winding Direction" $
-          hasCCWWinding rectangle1 `shouldBe` True
+          hasCCWWinding rectangle `shouldBe` True
        it "Returns False if Contour has CW Winding Direction" $
-          hasCCWWinding (reverse rectangle1) `shouldBe` False
+          hasCCWWinding (reverse rectangle) `shouldBe` False
        it "Returns True if Contour with most down right point not in first spot has CCW Winding Direction" $
           hasCCWWinding rotatedrectangle `shouldBe` True
        it "Returns False if Contour with most down right point not in first spot has CW Winding Direction" $
@@ -120,9 +129,9 @@ spec = do
           
     describe "LibHslicer.Contour.makeContourCCW" $ do   
        it "CCW Winding Direction stays CCW" $
-          makeContourCCW rectangle1 `shouldBe` rectangle1
+          makeContourCCW rectangle `shouldBe` rectangle
        it "CW Winding Direction of rectangle becomes CCW" $
-          makeContourCCW (reverse rectangle1) `shouldBe` rectangle1
+          makeContourCCW (reverse rectangle) `shouldBe` rectangle
        it "CCW Winding Direction stays CCW" $
           makeContourCCW rotatedrectangle `shouldBe` rotatedrectangle
        it "CW Winding Direction of rectangle becomes CCW" $
