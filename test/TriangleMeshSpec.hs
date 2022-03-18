@@ -75,6 +75,8 @@ spec = do
             offsetNormal v2 v1 `shouldBe` vertexNormalize v1v2odiag
         it "calculates offset normal of two colinear vertices" $
             offsetNormal (Vertex 0 (-1) 0) (Vertex 0 1 0) `shouldBe` Vertex (-1) 0 0
+        it "calculates offset normal of two convex vertices with first one shorter" $
+            offsetNormal (mapV (/2) v1) v2 `shouldBe` vertexNormalize v1v2odiag
     
     describe "TriangleMesh.vertexDistance" $ do
         it "calculates distance between vertices" $

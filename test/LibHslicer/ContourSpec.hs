@@ -104,8 +104,8 @@ spec = do
           calculateOffsetForContour (-1) rectangle `shouldBe` rectangle_offset1
        --it "offsets a contour by -11" $
          -- print $ calculateOffsetForContour (-11) rectangle 
-       --it "offsets testpath by -1" $
-           --print $ calculateOffsetForContour (-1) testpath1
+       it "offsets testpath by -1" $
+           print $ calculateOffsetForContour (-1) testpath1
 
     describe "LibHslicer.Contour.downRightVertex" $ do
        it "gives back most down right vertex" $

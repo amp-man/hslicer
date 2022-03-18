@@ -63,19 +63,19 @@ vertexNormalize v@(Vertex x y z)
 vertexFlip :: Vertex -> Vertex
 vertexFlip = mapV (*(-1))
 
-parallelToVec :: Vertex -> Vertex -> Bool
-parallelToVec v1 v2 = xyCrossProduct v1 v2 == 0
+isParallelTo :: Vertex -> Vertex -> Bool
+isParallelTo v1 v2 = xyCrossProduct v1 v2 == 0
 
 -- According to parallelogram addition Rules
 -- Relative Vertices
 vertexDiagonal :: Vertex -> Vertex -> Vertex
-vertexDiagonal v1 v2 |v1 `parallelToVec` v2 = Vertex (v1^.yCoord) (mapV (*(-1)) v1^.xCoord) (v1^.zCoord)
+vertexDiagonal v1 v2 |v1 `isParallelTo` v2 = Vertex (v1^.yCoord) (mapV (*(-1)) v1^.xCoord) (v1^.zCoord)
                      |otherwise = vertexFlip v1 `addV` v2
 
 -- Assuming anti-clockwise winding of Path
 -- Relative Vertices
 offsetNormal :: Vertex -> Vertex -> Vertex
-offsetNormal v1 v2 = vertexNormalize $ flipToRight v1 $ vertexDiagonal v1 v2
+offsetNormal v1 v2 = vertexNormalize $ flipToRight v1 $ vertexDiagonal (vertexNormalize v1) (vertexNormalize v2)
 
 -- Assuming anti-clockwise winding of path
 -- Relative Vertices
