@@ -24,7 +24,7 @@ module TriangleMesh (
     )
     where
 
-import Control.Lens (makeLenses, view, (&))
+import Control.Lens (view, (&), Lens', lens)
 
 data Vertex = Vertex {_xCoord, _yCoord, _zCoord :: Double} deriving Show
 data Triangle = Triangle {_vertex1, _vertex2, _vertex3 :: Vertex} deriving (Show)
@@ -35,8 +35,23 @@ instance Eq Vertex where
 instance Eq Triangle where
     (Triangle v1 v2 v3) == (Triangle v1' v2' v3') = v1 == v1' && v2 == v2' && v3 == v3'
 
-makeLenses ''Vertex
-makeLenses ''Triangle
+xCoord :: Lens' Vertex Double
+xCoord f (Vertex x y z) = (\x' -> Vertex x' y z) <$> (f x)
+
+yCoord :: Lens' Vertex Double
+yCoord f (Vertex x y z) = (\y' -> Vertex x y' z) <$> (f y)
+
+zCoord :: Lens' Vertex Double
+zCoord f (Vertex x y z) = (Vertex x y) <$> (f z)
+
+vertex1 :: Lens' Triangle Vertex
+vertex1 = lens _vertex1 (\triangle v1 -> triangle {_vertex1 = v1})
+
+vertex2 :: Lens' Triangle Vertex
+vertex2 = lens _vertex2 (\triangle v2 -> triangle {_vertex2 = v2})
+
+vertex3 :: Lens' Triangle Vertex
+vertex3 = lens _vertex3 (\triangle v3 -> triangle {_vertex3 = v3})
 
 mapV :: (Double -> Double) -> Vertex -> Vertex
 mapV f (Vertex x y z) = Vertex (f x) (f y) (f z)
@@ -79,7 +94,7 @@ flipToRight :: Vertex -> Vertex -> Vertex
 flipToRight v vn = if xyCrossProduct v vn > 0 then vertexFlip vn else vn
 
 -- calculate distance between vertices
-vertexDistance :: Vertex -> Vertex -> Double 
+vertexDistance :: Vertex -> Vertex -> Double
 vertexDistance (Vertex x1 y1 z1) (Vertex x2 y2 z2) = sqrt $ (x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2
 
 -- TODO: Swap to Maybe instead of error
