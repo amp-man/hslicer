@@ -6,6 +6,7 @@ import TriangleMesh
 import Control.Lens (over, view, set, (&), makeLenses)
 import Data.Maybe (fromMaybe)
 import Data.List
+import Debug.Trace
 
 data IntersecTriangle = IntersecTriangle {_triangle :: Triangle, _intersections :: [Vertex]} deriving Show
 newtype InnerContour = Inner [Vertex] deriving (Show, Eq)
@@ -162,10 +163,10 @@ calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
         b = a / tan alpha
         diagoffset = signum a * sqrt(a**2 + b**2)
 
--- TODO: Hier wird NOCH NICHT angenommen dass der Anfangspunkt am Anfang UND Ende in [Vertex] ist
 calculateOffsetForContour :: Double -> [Vertex] -> [Vertex]
 calculateOffsetForContour _ [] = []
-calculateOffsetForContour o c@(p1:p2:ps) = calculateOffsetForPoint o (last ps) p1 p2 : calculateOffsetForContour' o (c++[p1])
+calculateOffsetForContour o c@(p1:p2:ps) = let offsetp1 = calculateOffsetForPoint o (last $ init ps) p1 p2 
+                                           in offsetp1 : calculateOffsetForContour' o c ++ [offsetp1]
       where calculateOffsetForContour' :: Double -> [Vertex] -> [Vertex]
             calculateOffsetForContour' _ [] = []
             calculateOffsetForContour' o (p1:p2:p3:ps) = calculateOffsetForPoint o p1 p2 p3 : calculateOffsetForContour' o (p2:p3:ps)

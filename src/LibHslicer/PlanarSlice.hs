@@ -26,12 +26,17 @@ makeLenses ''NozzleAttrib
 makeLenses ''PrintParams
 makeLenses ''Combination
 
--- Calculate Extrusion Amount per Combination and adjust speed to not exceed maxExtrusionAmount
-maxExtrusionBarrier :: [[Combination]] -> [[Combination]]
-maxExtrusionBarrier = undefined
 
--- sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
--- sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (-0.2)) (sliceContours m sp)) sp
+sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
+sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (0)) (sliceContours m sp)) sp
+
+sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
+sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m))
+
+calcSliceOffsets :: Double -> Double -> Double -> [Double]
+calcSliceOffsets ch sh mh
+        | ch >= mh = [mh]
+        | otherwise = ch : calcSliceOffsets (ch+sh) sh mh
 
 toGCmd :: [[Combination]] -> [GCmd]
 toGCmd cs = cs ^.. (each. each . folding (\c -> return (AbsProgr [GArg {name= "X", value = Just $ showFFloat (Just 6) (c ^. (position.xCoord)) "" }, 
@@ -41,12 +46,10 @@ toGCmd cs = cs ^.. (each. each . folding (\c -> return (AbsProgr [GArg {name= "X
                                                        ) :: [GCmd]))
 
 printPrep :: [[Vertex]] -> SliceParams -> [[Combination]]
--- printPrep cs sp = map (\ x -> x ^.. (each . folding (\v -> return (Comb v (calcExtrVol v sp)) :: [Combination]))) cs
 printPrep cs sp = let neighbours = map (\c -> (head c, head c) : zip c (tail c)) cs
-                      --pparams = PParams{_extmove = calcMotorDistance (calcExtrVol v sp) (sp^.filamentWidth._1), _speed= sp ^. speed._1}
                   in over each (\ x -> x ^.. (each . folding (\(v1, v2) -> return (Comb v2 (calcPParams v1 v2 sp)) :: [Combination]))) neighbours
---printPrep cs sp = over (traverse . each) (\v -> return (Comb v (calcExtrVol v sp))) cs
 
+-- Hier maxExtrusionBarrier berechnen und ggf. velocity verringern
 calcPParams :: Vertex -> Vertex -> SliceParams -> PrintParams
 calcPParams v1 v2 sp = PParams {_extMove = calcMotorDistance (calcExtrVol v1 v2 sp) (sp ^. filamentWidth),
                                 _velocity   = sp ^. speed}
@@ -59,19 +62,6 @@ calcMotorDistance (ev, evu) (fw, fwu) =
   let fa = pi * (fw / 2) ^ 2
    in (ev / fa, "mm")
 
-sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
-sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m))
-
-calcSliceOffsets :: Double -> Double -> Double -> [Double]
-calcSliceOffsets ch sh mh
-        | ch >= mh = [mh]
-        | otherwise = ch : calcSliceOffsets (ch+sh) sh mh
-
--- sParamsTest = SParams {_sliceHeight=0.5, _nozzleWidth=0.6}
-
--- params = set sliceHeight 0.2 pParamDefault
-
--- combi = Comb {_position=Vertex 0.0 0.0 0.0, _physics=PParams { _extVolume = 1, _speed = 10}}
-
--- importParams :: Combination -> Combination
--- importParams = over (physics.sliceHeight) (+1)
+-- Calculate Extrusion Amount per Combination and adjust speed to not exceed maxExtrusionAmount
+maxExtrusionBarrier :: [[Combination]] -> [[Combination]]
+maxExtrusionBarrier = undefined
