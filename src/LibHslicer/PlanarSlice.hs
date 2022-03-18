@@ -6,6 +6,7 @@ import TriangleMesh
 import LibGcode
 import LibHslicer.Contour
 import Control.Lens
+import Numeric (showFFloat)
 
 type Unit = (Double, String)
 
@@ -18,7 +19,7 @@ sParamsDefault = SParams { _sliceHeight = (0.2,"mm"), _speed = (20,"mm/s"), _fil
 -- Pro Pfadsegment: Extrusionsvolumen, Geschwindigkeit,...
 data PrintParams = PParams {_extMove, _velocity :: Unit} deriving (Eq, Show)
 
-data Combination = Comb {_position :: Vertex, _physics :: PrintParams} deriving Show
+data Combination = Comb {_position :: Vertex, _physics :: PrintParams} deriving (Show, Eq)
 
 makeLenses ''SliceParams
 makeLenses ''NozzleAttrib
@@ -33,10 +34,10 @@ maxExtrusionBarrier = undefined
 -- sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (-0.2)) (sliceContours m sp)) sp
 
 toGCmd :: [[Combination]] -> [GCmd]
-toGCmd cs = cs ^.. (each. each . folding (\c -> return (AbsProgr [GArg {name= "X", value = Just $ show $ c ^. (position.xCoord)}, 
-                                                                  GArg {name= "Y", value = Just $ show $ c ^. (position.yCoord)}, 
-                                                                  GArg {name= "Z", value = Just $ show $ c ^. (position.zCoord)}, 
-                                                                  GArg {name= "E", value = Just $ show $ c ^. (physics.extMove._1)}]
+toGCmd cs = cs ^.. (each. each . folding (\c -> return (AbsProgr [GArg {name= "X", value = Just $ showFFloat (Just 6) (c ^. (position.xCoord)) "" }, 
+                                                                  GArg {name= "Y", value = Just $ showFFloat (Just 6) (c ^. (position.yCoord)) ""}, 
+                                                                  GArg {name= "Z", value = Just $ showFFloat (Just 6) (c ^. (position.zCoord)) ""}, 
+                                                                  GArg {name= "E", value = Just $ showFFloat (Just 6) (c ^. (physics.extMove._1)) ""}]
                                                        ) :: [GCmd]))
 
 printPrep :: [[Vertex]] -> SliceParams -> [[Combination]]
@@ -56,7 +57,7 @@ calcExtrVol v1 v2 sp = ((vertexDistance v1 v2) * (sp ^. nozzleAttributes.nozzleW
 calcMotorDistance :: Unit -> Unit -> Unit
 calcMotorDistance (ev, evu) (fw, fwu) =
   let fa = pi * (fw / 2) ^ 2
-   in (ev / fa, "mm2")
+   in (ev / fa, "mm")
 
 sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
 sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m))

@@ -2,15 +2,20 @@ module LibGcode(
     GCmd (..),
     GArg (..),
     writeGCode,
-    prettyGCode
+    prettyGCode,
+    preamble
 )
     where
 
 --import GHC.IO.FD (openFile)
 --import GHC.IO.IOMode (IOMode(WriteMode))
 
+preamble = "G21 ; set units to millimeters \n\
+           \G90 ; use absolute coordinates \n\
+           \M83 ; use relative distances for extrusion\n"
+
 writeGCode :: FilePath -> [GCmd] -> IO()
-writeGCode fp gcode = writeFile fp $ prettyGCode gcode
+writeGCode fp gcode = writeFile fp $ preamble ++ prettyGCode gcode
 
 -- List of GCmd (GCode)
 prettyGCode :: [GCmd] -> String
@@ -23,8 +28,8 @@ data GCmd = AbsProgr [GArg]
             | Text String
 
 prettyGCmd :: GCmd -> String
-prettyGCmd (AbsProgr x) = "G91 " ++ prettyGArgs x
-prettyGCmd (RelProgr x) = "G90 " ++ prettyGArgs x
+prettyGCmd (AbsProgr x) = "G1 " ++ prettyGArgs x
+prettyGCmd (RelProgr x) = "G0 " ++ prettyGArgs x
 prettyGCmd (Text x) = show x
 
 -- GCmd Arguments
