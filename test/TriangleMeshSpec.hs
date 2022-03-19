@@ -4,6 +4,7 @@ import TriangleMesh
 import Test.Hspec (Spec, describe, context, it, shouldBe, shouldThrow, anyErrorCall)
 import Test.QuickCheck
 import Control.Exception (evaluate)
+import Control.Lens
 
 spec :: Spec
 spec = do
@@ -17,6 +18,30 @@ spec = do
         t1 = Triangle (Vertex 0.0 0.0 0.0) (Vertex 0.0 1.0 0.0) (Vertex 1.0 0.0 0.0)
         t2 = Triangle (Vertex 0.0 0.0 0.0) (Vertex 0.0 1.0 0.0) (Vertex 0.0 0.0 1.0)
     
+    describe "TriangleMesh.xCoord" $ do
+        it "views x-coordinate in vertex" $ 
+          view xCoord v1 `shouldBe` 2.0
+        it "sets x-coordinate in vertex" $
+          set xCoord 3.0 v1 `shouldBe` Vertex 3.0 1.0 0.0
+        it "adjusts x-coordinate in vertex" $
+          over xCoord (subtract 1.5) v1 `shouldBe` Vertex 0.5 1.0 0.0
+    
+    describe "TriangleMesh.zCoord" $ do
+        it "views z-coordinate in vertex" $ 
+          v1 ^. zCoord `shouldBe` _zCoord v1
+        it "sets z-coordinate in vertex" $
+          (v1 & zCoord .~ 3.0) `shouldBe` v1 {_zCoord = 3.0}
+        it "adjusts z-coordinate in vertex" $
+          (v1 & zCoord %~ (+1.0)) `shouldBe` v1 {_zCoord = 1.0}
+    
+    describe "TriangleMesh.vertex1" $ do
+        it "views 1st vertex of triangle" $ 
+          t1 ^. vertex1 `shouldBe` _vertex1 t1
+        it "sets 1st vertex of triangle" $
+          (t1 & vertex1 .~ v1) `shouldBe` t1 {_vertex1 = v1}
+        it "adjusts 1st vertex of triangle" $
+          (t1 & vertex1 %~ mapV (*2)) `shouldBe` t1 {_vertex1 = mapV (*2) (Vertex 0.0 0.0 0.0)}
+
     describe "TriangleMesh.mapV" $ do
         it "maps (+i) to all vertex coordinates" $ 
           property $
