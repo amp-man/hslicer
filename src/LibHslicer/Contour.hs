@@ -7,6 +7,7 @@ import Control.Lens (over, view, set, (&), makeLenses)
 import Data.Maybe (fromMaybe)
 import Data.List
 import Debug.Trace
+import Control.Parallel.Strategies
 
 data IntersecTriangle = IntersecTriangle {_triangle :: Triangle, _intersections :: [Vertex]} deriving Show
 newtype InnerContour = Inner [Vertex] deriving (Show, Eq)
@@ -14,6 +15,9 @@ newtype OuterContour = Outer [Vertex] deriving (Show, Eq)
 
 instance Eq IntersecTriangle where
     (IntersecTriangle t ins) == (IntersecTriangle t' ins') = t == t' && all (`elem` ins') ins && all (`elem` ins) ins'
+
+instance InnerContour where
+    rnf (Inner xs) = Inner $ rnf xs
 
 makeLenses ''IntersecTriangle
 
@@ -146,7 +150,7 @@ makeContourCCW c = if not $ hasCCWWinding c then reverse c else c
 
 generateContour :: [Triangle] -> Double -> [Either InnerContour OuterContour]
 generateContour [] _ = []
-generateContour ts zSlice = classifyContour $ map pathToContour (separatePaths $ createCoherentPath $
+generateContour ts zSlice = classifyContour $ map (makeContourCCW.pathToContour) (separatePaths $ createCoherentPath $
     filter (\intTri -> length (intTri & view intersections) == 2) (map (`calcIntersecTriangle` zSlice) ts))
 
 -- Inspired by Aichholzer et al.(1995),"A novel type of skeleton for polygons": https://www.jucs.org/jucs_1_12/a_novel_type_of/

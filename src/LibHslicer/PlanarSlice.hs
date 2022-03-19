@@ -6,7 +6,9 @@ import TriangleMesh
 import LibGcode
 import LibHslicer.Contour
 import Control.Lens
+import Control.Parallel
 import Numeric (showFFloat)
+import Control.Parallel.Strategies
 
 type Unit = (Double, String)
 
@@ -29,9 +31,10 @@ makeLenses ''Combination
 
 sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
 sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (-1)) (sliceContours m sp)) sp
+--sliceMesh m sp = toGCmd $ printPrep (map (calculateOffsetInnerOuter (0) $ (fmap (pure makeContourCCW))) (sliceContours m sp)) sp
 
-sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
-sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m))
+sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]] 
+sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m)) `using` (parList rdeepseq)
 
 calcSliceOffsets :: Double -> Double -> Double -> [Double]
 calcSliceOffsets ch sh mh
