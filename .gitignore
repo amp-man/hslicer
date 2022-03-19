@@ -56,3 +56,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+gcodefile.gcode
+hslicer-exe.eventlog
