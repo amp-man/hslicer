@@ -13,6 +13,7 @@ spec = do
         rectangle_offset1 = [Vertex 1 1 0, Vertex 9 1 0, Vertex 9 9 0, Vertex 1 9 0, Vertex 1 1 0]
         testpath = [Vertex 0.100005 20.007000 0.000000, Vertex 0.200000 0.399980 0.000000, Vertex 10.003995 0.200000 0.000000, Vertex 9.904000 19.807020 0.000000, Vertex 0.100005 20.007000 0.000000]
         testpath1 = [Vertex 0.000000 0.133344 0.200000, Vertex 0.000000 0.000000 0.200000, Vertex 10.037325 0.000000 0.200000, Vertex 10.104000 0.000000 0.200000, Vertex 10.104000 20.073656 0.200000, Vertex 10.104000 20.207000 0.200000, Vertex 0.066675 20.207000 0.200000, Vertex 0.000000 20.207000 0.200000, Vertex 0.000000 0.133344 0.200000]
+        testpathcw = [Vertex 0.000000 0.000000 30.308000, Vertex 0.000000 20.207000 30.308000, Vertex 10.104000 20.207000 30.308000, Vertex 10.104000 0.000000 30.308000, Vertex 0.000000 0.000000 30.308000]
         rotatedrectangle = [Vertex 10 10 0, Vertex 0 10 0, Vertex 0 0 0, Vertex 10 0 0, Vertex 10 10 0]
 
     describe "LibHslicer.Contour.isIntersectingVertex" $ do
@@ -102,10 +103,8 @@ spec = do
     describe "LibHslicer.Contour.calculateOffsetForContour" $ do
        it "offsets a contour by -1" $
           calculateOffsetForContour (-1) rectangle `shouldBe` rectangle_offset1
-       --it "offsets a contour by -11" $
-         -- print $ calculateOffsetForContour (-11) rectangle 
-       it "offsets testpath by -1" $
-           print $ calculateOffsetForContour (-1) testpath1
+       it "offsets clockwise testpath by -1" $
+           print $ calculateOffsetForContour (-1) $ makeContourCCW testpathcw
 
     describe "LibHslicer.Contour.downRightVertex" $ do
        it "gives back most down right vertex" $
