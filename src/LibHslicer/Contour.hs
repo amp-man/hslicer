@@ -159,9 +159,9 @@ generateContour ts zSlice = classifyContour $ map (makeContourCCW.pathToContour)
     filter (\intTri -> length (intTri & view intersections) == 2) (map (`calcIntersecTriangle` zSlice) ts))
 
 -- Inspired by Aichholzer et al.(1995),"A novel type of skeleton for polygons": https://www.jucs.org/jucs_1_12/a_novel_type_of/
--- Assuming anti-clockwise winding of path: Left is inside of contour, right outside
--- Offset Point is calculated by moving contour point along diagonal of two contour vertices
--- Negative offset is to inside of contour, Positive to outside
+-- Assuming counter-clockwise winding of path: Left is inside of contour, right outside
+-- Offset point is calculated by moving contour point along diagonal of two contour vertices
+-- Negative offset is to inside of contour, positive to outside
 calculateOffsetForPoint :: Double -> Vertex -> Vertex -> Vertex -> Vertex
 calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
     where
@@ -177,7 +177,9 @@ calculateOffsetForContour o c@(p1:p2:ps) = let offsetp1 = calculateOffsetForPoin
                                            in offsetp1 : calculateOffsetForContour' o c ++ [offsetp1]
       where calculateOffsetForContour' :: Double -> [Vertex] -> [Vertex]
             calculateOffsetForContour' _ [] = []
-            calculateOffsetForContour' o (p1:p2:p3:ps) = calculateOffsetForPoint o p1 p2 p3 : calculateOffsetForContour' o (p2:p3:ps)
+            calculateOffsetForContour' o (p1:p2:p3:ps) = if iscolinear then csfunction else calculateOffsetForPoint o p1 p2 p3 : csfunction
+                where iscolinear = isParallelTo p1 p2 && isParallelTo p2 p3 && isParallelTo p1 p3
+                      csfunction = calculateOffsetForContour' o (p2:p3:ps)
             calculateOffsetForContour' _ _ = []
 calculateOffsetForContour _ _ = []
 

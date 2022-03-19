@@ -26,6 +26,7 @@ In Ordnung, vielleicht kann man ja auch einen Teilparser mit den applikativen Pa
 um Applicative als Thema zu demonstrieren.
 
 Co-authored-by: KatjaFrey <KatjaFrey@users.noreply.github.com>
+
 Build command: stack build --ghc-options "-O -threaded -rtsopts"
 Run command: stack exec -- hslicer-exe "./test/Lib3mfSpec_res/box_sliced/3D/3dmodel.model" "./gcodefile.gcode"
 Time Build command: stack build --ghc-options "-O -threaded -rtsopts"

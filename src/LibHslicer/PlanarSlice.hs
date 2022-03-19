@@ -29,7 +29,10 @@ makeLenses ''PrintParams
 makeLenses ''Combination
 
 sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
-sliceMesh m sp = toGCmd $ printPrep (concatMap (calcMultiOffset sp) (sliceContours m sp) `using` (parList rdeepseq)) sp
+sliceMesh m sp = let contours = sliceContours m sp
+                     multiOffsets = contours `pseq` (concatMap (calcMultiOffset sp) contours) --`using` (parList rdeepseq))
+                 in toGCmd $ printPrep multiOffsets sp
+        -- toGCmd $ printPrep (concatMap (calcMultiOffset sp) (sliceContours m sp) `using` (parList rdeepseq)) sp
 
 calcMultiOffset :: SliceParams -> [Either InnerContour OuterContour] -> [[Vertex]]
 calcMultiOffset sp cs = let fc = sp^.nozzleAttributes.nozzleWidth._1 / 2
@@ -41,7 +44,7 @@ calcMultiOffset sp cs = let fc = sp^.nozzleAttributes.nozzleWidth._1 / 2
 
 
 sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
-sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m)) `using` (parList rdeepseq)
+sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m)) --`using` (parList rdeepseq)
 
 calcSliceOffsets :: Double -> Double -> Double -> [Double]
 calcSliceOffsets ch sh mh

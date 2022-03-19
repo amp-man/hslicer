@@ -12,6 +12,8 @@ spec :: Spec
 spec = do
     let path = "test/Lib3mfSpec_res/sphere/3D/3dmodel.model"
         path2 = "test/Lib3mfSpec_res/Polygon/3D/3dmodel.model"
+    it "Unneccessary test" $ do
+        print "DONUT"
     -- it "parses triangles from 3mf file and generates contour" $ do
     --     vertices <- parseVertices path
     --     triangles <- parseTriangles path vertices

@@ -16,6 +16,7 @@ module TriangleMesh (
     vertexDiagonal,
     vertexLength,
     vertexFlip,
+    isParallelTo,
     xyCrossProduct,
     offsetNormal,
     vertexDistance,
