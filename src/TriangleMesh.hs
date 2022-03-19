@@ -11,7 +11,7 @@ module TriangleMesh (
     vertex3,
     mapV,
     addV,
-    dot,
+    dotProduct,
     vertexNormalize,
     vertexDiagonal,
     vertexLength,
@@ -25,12 +25,17 @@ module TriangleMesh (
     where
 
 import Control.Lens
+import Control.Parallel.Strategies
+import Control.DeepSeq
 
 data Vertex = Vertex {_xCoord, _yCoord, _zCoord :: Double} deriving Show
 data Triangle = Triangle {_vertex1, _vertex2, _vertex3 :: Vertex} deriving (Show)
 
 instance Eq Vertex where
     (Vertex x1 y1 z1) == (Vertex x2 y2 z2) = x1 == x2 && y1 == y2 && z1 == z2
+
+instance NFData Vertex where
+    rnf (Vertex x y z) = rnf x `seq` rnf y `seq` rnf z
 
 instance Eq Triangle where
     (Triangle v1 v2 v3) == (Triangle v1' v2' v3') = v1 == v1' && v2 == v2' && v3 == v3'
@@ -59,8 +64,8 @@ mapV f (Vertex x y z) = Vertex (f x) (f y) (f z)
 addV :: Vertex -> Vertex -> Vertex
 addV (Vertex x1 y1 z1) (Vertex x2 y2 z2) = Vertex (x1 + x2) (y1 + y2) (z1 + z2)
 
-dot :: Vertex -> Vertex -> Double
-dot (Vertex x1 y1 z1) (Vertex x2 y2 z2) = (x1*x2)+(y1*y2)+(z1*z2)
+dotProduct :: Vertex -> Vertex -> Double
+dotProduct (Vertex x1 y1 z1) (Vertex x2 y2 z2) = (x1*x2)+(y1*y2)+(z1*z2)
 
 vertexLength :: Vertex -> Double
 vertexLength (Vertex x y z) = sqrt(x**2 + y**2 + z**2)

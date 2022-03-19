@@ -37,6 +37,7 @@ library
   build-depends:
       QuickCheck
     , base >=4.7 && <5
+    , deepseq
     , lens
     , parallel
     , text
@@ -53,6 +54,7 @@ executable hslicer-exe
   build-depends:
       QuickCheck
     , base >=4.7 && <5
+    , deepseq
     , hslicer
     , lens
     , parallel
@@ -79,6 +81,7 @@ test-suite hslicer-test
   build-depends:
       QuickCheck
     , base >=4.7 && <5
+    , deepseq
     , hslicer
     , hspec
     , lens

@@ -25,7 +25,7 @@ prettyGCode (x:xs) = prettyGCmd x ++ "\n" ++ prettyGCode xs
 -- GCmd
 data GCmd = AbsProgr [GArg]
             | RelProgr [GArg]
-            | Text String
+            | Text String deriving Show
 
 prettyGCmd :: GCmd -> String
 prettyGCmd (AbsProgr x) = "G1 " ++ prettyGArgs x
@@ -37,7 +37,7 @@ prettyGArgs :: [GArg] -> String
 prettyGArgs [] = ""
 prettyGArgs (x:xs) = prettyGArg x ++ " " ++ prettyGArgs xs
 
-data GArg = GArg {name :: String, value :: Maybe String}
+data GArg = GArg {name :: String, value :: Maybe String} deriving Show
 
 prettyGArg :: GArg -> String
 prettyGArg (GArg name Nothing) = name

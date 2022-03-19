@@ -8,6 +8,7 @@ import Data.Maybe (fromMaybe)
 import Data.List
 import Debug.Trace
 import Control.Parallel.Strategies
+import Control.DeepSeq
 
 data IntersecTriangle = IntersecTriangle {_triangle :: Triangle, _intersections :: [Vertex]} deriving Show
 newtype InnerContour = Inner [Vertex] deriving (Show, Eq)
@@ -16,8 +17,11 @@ newtype OuterContour = Outer [Vertex] deriving (Show, Eq)
 instance Eq IntersecTriangle where
     (IntersecTriangle t ins) == (IntersecTriangle t' ins') = t == t' && all (`elem` ins') ins && all (`elem` ins) ins'
 
-instance InnerContour where
-    rnf (Inner xs) = Inner $ rnf xs
+instance NFData InnerContour where
+    rnf (Inner xs) = rnf xs
+
+instance NFData OuterContour where
+    rnf (Outer xs) = rnf xs
 
 makeLenses ''IntersecTriangle
 
@@ -104,7 +108,8 @@ separatePaths ts = separatePaths' ts [] [] where
         else separatePaths' xs (x:curr) akk
 
 pathToContour :: [IntersecTriangle] -> [Vertex]
-pathToContour = concatMap (\t -> init $ t & view intersections)
+pathToContour [] = []
+pathToContour xs = concatMap (\t -> init $ t & view intersections) xs
 
 isInnerContourOf :: [Vertex] -> [Vertex] -> Bool
 isInnerContourOf [] _ = True
@@ -163,7 +168,7 @@ calculateOffsetForPoint a p1 p2 p3 = p2 `addV` mapV (*diagoffset) offsetnormal
         p1p2vec = p2 `addV` vertexFlip p1
         p2p3vec = p3 `addV` vertexFlip p2
         offsetnormal = offsetNormal p1p2vec p2p3vec
-        alpha = acos(dot p1p2vec offsetnormal / (vertexLength p1p2vec * vertexLength offsetnormal))
+        alpha = acos(dotProduct p1p2vec offsetnormal / (vertexLength p1p2vec * vertexLength offsetnormal))
         b = a / tan alpha
         diagoffset = signum a * sqrt(a**2 + b**2)
 
@@ -176,7 +181,6 @@ calculateOffsetForContour o c@(p1:p2:ps) = let offsetp1 = calculateOffsetForPoin
             calculateOffsetForContour' _ _ = []
 calculateOffsetForContour _ _ = []
 
-calculateOffsetInnerOuter :: Double -> [Either InnerContour OuterContour] -> [Vertex]
-calculateOffsetInnerOuter o ((Left (Inner c)):cs) = calculateOffsetForContour (o*(-1)) c ++ calculateOffsetInnerOuter o cs
-calculateOffsetInnerOuter o ((Right (Outer c)):cs) = calculateOffsetForContour o c ++ calculateOffsetInnerOuter o cs
-calculateOffsetInnerOuter _ _ = []
+calculateOffsetInnerOuter :: Double -> Either InnerContour OuterContour -> [Vertex]
+calculateOffsetInnerOuter o (Left (Inner c)) = calculateOffsetForContour (o*(-1)) c
+calculateOffsetInnerOuter o (Right (Outer c)) = calculateOffsetForContour o c

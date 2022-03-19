@@ -13,3 +13,4 @@ main = do
     vertices <- parseVertices inputPath
     triangles <- parseTriangles inputPath vertices
     writeGCode outputPath (sliceMesh triangles sParamsDefault)
+    -- putStrLn $ show $ sliceContours triangles sParamsDefault

@@ -25,6 +25,7 @@ dependencies:
 - text
 - lens
 - parallel
+- deepseq
 - QuickCheck
 
 library:
