@@ -21,6 +21,20 @@ Geplante vertiefende Themen:
 - Funktionale Referenzen (Linsen): Es sollen Datenstrukturen zur Beschreibung des Dreiecks-Mesh und der 2D-Pfade erzeugt werden.
   Verschiedene Berechnungen, die diese Datenstrukturen verändern, sollen Gebrauch von Linsen machen.
 
+Beispielhafte Programmaufrufe mit Stack:
+
+`stack exec -- hslicer-exe -s 0.2 -c 4 -o "./gcodefile.gcode" "./resources/example_3mfs/Box/3D/3dmodel.model" +RTS -N`
+
+<img src="resources/pictures/Box_with_4offset.png" width="300">
+
+`stack exec -- hslicer-exe -s 0.2 -c 4 -o "./gcodefile.gcode" "./resources/example_3mfs/Box_Hole/3D/3dmodel.model" +RTS -N`
+
+<img src="resources/pictures/Box_Hole_with_4offset.png" width="300">
+
+`stack exec -- hslicer-exe -s 0.2 -c 1 -o "./gcodefile.gcode" "./resources/example_3mfs/Polygon/3D/3dmodel.model" +RTS -N`
+
+<img src="resources/pictures/Polygon_with_1offset.png" width="300">
+
 Co-authored-by: KatjaFrey <KatjaFrey@users.noreply.github.com>
 
 Build command: `stack build --ghc-options "-O -threaded -rtsopts"`
