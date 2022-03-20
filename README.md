@@ -3,7 +3,7 @@
 Thema:
 Programmieren eines Slicers für den 3D-Druck
 
-<img src="resources/pictures/slice_innerouter.png" width="300">
+<img src="resources/pictures/titlepage_aim.png" width="600">
 
 Beschreibung:
 - Einlesen eines 3D-Körpers/Dreiecks-Mesh, dessen Vektoren, Normalen, und Flächen in einer mit
