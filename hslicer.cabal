@@ -70,7 +70,6 @@ test-suite hslicer-test
   other-modules:
       Examples.Box
       Examples.RealCuboid
-      IntegrationSpec
       Lib3mfSpec
       LibGcodeSpec
       LibHslicer.ContourSpec

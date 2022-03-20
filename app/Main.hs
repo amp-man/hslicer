@@ -7,6 +7,7 @@ import Control.Lens
 import Options.Applicative as OA
 import Data.Semigroup ((<>))
 
+-- Mirror of sliceParams data structure + filepaths
 data Args = Args
     { sliceHeight :: Double
     , contourLines :: Int
@@ -18,6 +19,7 @@ data Args = Args
     , inputfp :: String
     }
 
+-- Parser for handling command line arguments
 args :: Parser Args 
 args = Args
         <$> option auto
@@ -76,6 +78,7 @@ main = doslice =<< execParser opts
      <> progDesc "Slice a 3mf file into gcode"
      <> header "HSlicer" )
 
+-- Actually slicing the mesh
 doslice :: Args -> IO ()
 doslice (Args sh cl v fw nw mea outputfp inputfp) = do
     let nozzleAttrib = NAttrib { _nozzleWidth = (nw,"mm"), _maxExtrusionAmount = (mea,"mm3/s")}

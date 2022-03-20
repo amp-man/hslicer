@@ -14,7 +14,6 @@ spec = do
         vra1 = Vertex 10 0 0
         vra2 = Vertex 0 10 0
         vradiag = Vertex 1.0 (-1.0) 0.0
-
         t1 = Triangle (Vertex 0.0 0.0 0.0) (Vertex 0.0 1.0 0.0) (Vertex 1.0 0.0 0.0)
         t2 = Triangle (Vertex 0.0 0.0 0.0) (Vertex 0.0 1.0 0.0) (Vertex 0.0 0.0 1.0)
     
