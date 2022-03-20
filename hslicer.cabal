@@ -39,10 +39,10 @@ library
     , base >=4.7 && <5
     , deepseq
     , lens
+    , optparse-applicative
     , parallel
     , text
     , xml-conduit
-    , zip
   default-language: Haskell2010
 
 executable hslicer-exe
@@ -58,10 +58,10 @@ executable hslicer-exe
     , deepseq
     , hslicer
     , lens
+    , optparse-applicative
     , parallel
     , text
     , xml-conduit
-    , zip
   default-language: Haskell2010
 
 test-suite hslicer-test
@@ -87,8 +87,8 @@ test-suite hslicer-test
     , hslicer
     , hspec
     , lens
+    , optparse-applicative
     , parallel
     , text
     , xml-conduit
-    , zip
   default-language: Haskell2010

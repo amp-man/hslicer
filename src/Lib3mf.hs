@@ -30,9 +30,13 @@ parseTriangles path vs = do
         cursor $// element triangles &// element triangle >=>
             \axis -> [Triangle {_vertex1 = deriveVertex (attribute "v1" axis) vs, _vertex2 = deriveVertex (attribute "v2" axis) vs, _vertex3 = deriveVertex (attribute "v3" axis) vs}]
 
+-- The xml-conduit library parses the data from the 3mf model xml to type T.Text
+-- For vertices, this must be converted to type Double to fit our representation of the triangle mesh
 convertToDouble :: [T.Text] -> Double
 convertToDouble text = read $ T.unpack $ T.concat text ::Double
 
+-- The xml-conduit library parses the data from the 3mf model xml to type T.Text
+-- For triangles, this must be converted to type Vertex to fit our representation of the triangle mesh
 deriveVertex :: [T.Text] -> [Vertex] -> Vertex
 deriveVertex index list = list !! (read $ T.unpack $ T.concat index :: Int)
 

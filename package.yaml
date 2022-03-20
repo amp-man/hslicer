@@ -27,7 +27,7 @@ dependencies:
 - parallel
 - deepseq
 - QuickCheck
-#- zip
+- optparse-applicative
 
 library:
   source-dirs: src
