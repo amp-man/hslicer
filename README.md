@@ -6,6 +6,9 @@ Programmieren eines Slicers für den 3D-Druck
 
 
 
+Die GCode - Datei kann am besten im Browser visualisiert werden.
+Dazu empfehlen wir: https://ncviewer.com - hier die erzeugte Datei hoch laden.
+
 Beispielhafte Programmaufrufe mit Stack:
 
 1. Einfache Box:
