@@ -4,7 +4,7 @@ import LibHslicer.Contour
 import TriangleMesh
 import Test.Hspec (Spec, describe, context, it, shouldBe)
 import Control.Lens
-import Examples.Box
+import Examples.ReferenceMesh
 
 spec :: Spec
 spec = do

@@ -3,11 +3,11 @@ module Lib3mfSpec where
 import Lib3mf
 import TriangleMesh
 import Test.Hspec (Spec, describe, context, it, shouldBe)
-import Examples.RealCuboid
+import Examples.Box
 
 spec :: Spec
 spec = do
-   let path = "resources/example_3mfs/box_sliced/3D/3dmodel.model"
+   let path = "resources/example_3mfs/Box/3D/3dmodel.model"
 
    it "parses vertices from 3mf file" $ do
       vertices <- parseVertices path

@@ -69,7 +69,7 @@ test-suite hslicer-test
   main-is: Spec.hs
   other-modules:
       Examples.Box
-      Examples.RealCuboid
+      Examples.ReferenceMesh
       Lib3mfSpec
       LibGcodeSpec
       LibHslicer.ContourSpec

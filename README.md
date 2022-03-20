@@ -3,7 +3,7 @@
 Thema:
 Programmieren eines Slicers für den 3D-Druck
 
-<img src="resources/pictures/slice.png" width="300">
+<img src="resources/pictures/slice_innerouter.png" width="300">
 
 Beschreibung:
 - Einlesen eines 3D-Körpers/Dreiecks-Mesh, dessen Vektoren, Normalen, und Flächen in einer mit
@@ -24,7 +24,7 @@ Geplante vertiefende Themen:
 Co-authored-by: KatjaFrey <KatjaFrey@users.noreply.github.com>
 
 Build command: stack build --ghc-options "-O -threaded -rtsopts"
-Run command: stack exec -- hslicer-exe "./resources/example_3mfs/box_sliced/3D/3dmodel.model" "./gcodefile.gcode"
+Run command: stack exec -- hslicer-exe "./resources/example_3mfs/Box/3D/3dmodel.model" "./gcodefile.gcode"
 Time command: stack exec -- hslicer-exe "./resources/example_3mfs/Polygon/3D/3dmodel.model" "./gcodefile.gcode" +RTS -N -s 2>&1 | sed -n "/Total/p" 
 
 Time Benchmark for different cpu core nrs:
