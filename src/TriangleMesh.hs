@@ -17,6 +17,7 @@ module TriangleMesh (
     vertexLength,
     vertexFlip,
     isParallelTo,
+    areColinear,
     xyCrossProduct,
     offsetNormal,
     vertexDistance,
@@ -87,6 +88,9 @@ vertexFlip = mapV (*(-1))
 isParallelTo :: Vertex -> Vertex -> Bool
 isParallelTo v1 v2 = xyCrossProduct v1 v2 == 0
 
+areColinear :: Vertex -> Vertex -> Vertex -> Bool
+areColinear p1 p2 p3 = p1 `isParallelTo` p2 && p2 `isParallelTo` p3 && p1 `isParallelTo` p3
+
 -- According to parallelogram addition Rules
 -- Relative Vertices
 vertexDiagonal :: Vertex -> Vertex -> Vertex
@@ -103,7 +107,7 @@ offsetNormal v1 v2 = vertexNormalize $ flipToRight v1 $ vertexDiagonal (vertexNo
 flipToRight :: Vertex -> Vertex -> Vertex
 flipToRight v vn = if xyCrossProduct v vn > 0 then vertexFlip vn else vn
 
--- calculate distance between vertices
+-- Calculates distance between vertices
 vertexDistance :: Vertex -> Vertex -> Double
 vertexDistance (Vertex x1 y1 z1) (Vertex x2 y2 z2) = sqrt $ (x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2
 

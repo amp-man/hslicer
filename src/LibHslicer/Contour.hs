@@ -177,9 +177,8 @@ calculateOffsetForContour o c@(p1:p2:ps) = let offsetp1 = calculateOffsetForPoin
                                            in offsetp1 : calculateOffsetForContour' o c ++ [offsetp1]
       where calculateOffsetForContour' :: Double -> [Vertex] -> [Vertex]
             calculateOffsetForContour' _ [] = []
-            calculateOffsetForContour' o (p1:p2:p3:ps) = if iscolinear then csfunction else calculateOffsetForPoint o p1 p2 p3 : csfunction
-                where iscolinear = isParallelTo p1 p2 && isParallelTo p2 p3 && isParallelTo p1 p3
-                      csfunction = calculateOffsetForContour' o (p2:p3:ps)
+            calculateOffsetForContour' o (p1:p2:p3:ps) = if areColinear p1 p2 p3 then psfunc else calculateOffsetForPoint o p1 p2 p3 : psfunc
+                where psfunc = calculateOffsetForContour' o (p2:p3:ps)
             calculateOffsetForContour' _ _ = []
 calculateOffsetForContour _ _ = []
 
