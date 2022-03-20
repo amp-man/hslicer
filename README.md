@@ -23,7 +23,7 @@ Geplante vertiefende Themen:
 
 Co-authored-by: KatjaFrey <KatjaFrey@users.noreply.github.com>
 
-Build command: stack build --ghc-options "-O -threaded -rtsopts"
+Build command: `stack build --ghc-options "-O -threaded -rtsopts"`
 Run command: stack exec -- hslicer-exe "./resources/example_3mfs/Box/3D/3dmodel.model" "./gcodefile.gcode"
 Time command: stack exec -- hslicer-exe "./resources/example_3mfs/Polygon/3D/3dmodel.model" "./gcodefile.gcode" +RTS -N -s 2>&1 | sed -n "/Total/p" 
 
