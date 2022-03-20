@@ -11,15 +11,18 @@ import Numeric (showFFloat)
 import Control.Parallel.Strategies
 import Control.DeepSeq
 
+-- We want to make sure that all dimensions stay in relation
+-- by specifying a physical unit (e.g. mm, mm2, mm3 | cm, cm2, cm3)
+-- TODO: Make sure to check for matching units
 type Unit = (Double, String)
 
--- Düsengröße, Slice-Höhe,...
+-- Parameters for the slice session
 data NozzleAttrib = NAttrib { _nozzleWidth, _maxExtrusionAmount::Unit} deriving Show
 data SliceParams = SParams { _sliceHeight::Unit, _contourLines::Int, _speed::Unit, _filamentWidth::Unit, _nozzleAttributes::NozzleAttrib } deriving Show
 nAttribDefault = NAttrib { _nozzleWidth = (0.4,"mm"), _maxExtrusionAmount = (0.2,"mm3/s")}
-sParamsDefault = SParams { _sliceHeight = (0.2,"mm"), _contourLines = 1, _speed = (20,"mm/s"), _filamentWidth = (1.75,"mm"), _nozzleAttributes = nAttribDefault }
+sParamsDefault = SParams { _sliceHeight = (0.2,"mm"), _contourLines = 4, _speed = (20,"mm/s"), _filamentWidth = (1.75,"mm"), _nozzleAttributes = nAttribDefault }
 
--- Pro Pfadsegment: Extrusionsvolumen, Geschwindigkeit,...
+-- Parameters per Contour Segment
 data PrintParams = PParams {_extMove, _velocity :: Unit} deriving (Eq, Show)
 
 data Combination = Comb {_position :: Vertex, _physics :: PrintParams} deriving (Show, Eq)
@@ -35,9 +38,12 @@ makeLenses ''NozzleAttrib
 makeLenses ''PrintParams
 makeLenses ''Combination
 
+-- Entry Function to slice a Triangle Mesh planarly
 sliceMesh :: [Triangle] -> SliceParams -> [GCmd]
 sliceMesh m sp = toGCmd $ printPrep (concatMap (calcMultiOffset sp) (sliceContours m sp)) sp
 
+-- Calculate offsets with spacing as specified in SliceParams
+-- by _contourLines and _nozzleWidth
 calcMultiOffset :: SliceParams -> [Either InnerContour OuterContour] -> [[Vertex]]
 calcMultiOffset sp cs = let fc = sp^.nozzleAttributes.nozzleWidth._1 / 2
                             lc = fc + (fromIntegral (sp^.contourLines - 1) * sp^.nozzleAttributes.nozzleWidth._1)
@@ -45,6 +51,7 @@ calcMultiOffset sp cs = let fc = sp^.nozzleAttributes.nozzleWidth._1 / 2
                             offsetFuncs = map calculateOffsetInnerOuter offsets
                         in offsetFuncs <*> cs --`using` (parList rdeepseq)
 
+-- Slice all contours according to _sliceHeight specified in SliceParams
 sliceContours :: [Triangle] -> SliceParams -> [[Either InnerContour OuterContour]]
 sliceContours m sp = map (generateContour m) (calcSliceOffsets (meshFloor m) (view (sliceHeight._1) sp) (meshCeil m)) `using` (parList rdeepseq)
 
@@ -53,6 +60,7 @@ calcSliceOffsets ch sh mh
         | ch >= mh = [mh]
         | otherwise = ch : calcSliceOffsets (ch+sh) sh mh
 
+-- Because our contours are absolute points we can convert them to absolute G-Code moves
 toGCmd :: [[Combination]] -> [GCmd]
 toGCmd cs = cs ^.. (each. each . folding (\c -> return (AbsProgr [GArg {name= "X", value = Just $ showFFloat (Just 6) (c ^. (position.xCoord)) "" },
                                                                   GArg {name= "Y", value = Just $ showFFloat (Just 6) (c ^. (position.yCoord)) ""},
@@ -76,12 +84,14 @@ calcPParams v1 v2 sp = PParams {_extMove = calcMotorDistance (calcExtrVol v1 v2 
 calcExtrVol :: Vertex -> Vertex -> SliceParams -> Unit
 calcExtrVol v1 v2 sp = ((vertexDistance v1 v2) * (sp ^. nozzleAttributes.nozzleWidth._1) * (sp ^. sliceHeight._1), "mm3")
 
+-- Calculate actual extruder motor movement
+-- using Extrusion Volume and Filament Diameter
 calcMotorDistance :: Unit -> Unit -> Unit
-calcMotorDistance ev fw = (ev^._1 / circleArea (fw^._1 / 2) , "mm")
+calcMotorDistance ev fd = (ev^._1 / circleArea (fd^._1 / 2) , "mm")
 
 circleArea :: Double -> Double
 circleArea r = pi * r ^ 2
 
--- Calculate Extrusion Amount per Combination and adjust speed to not exceed maxExtrusionAmount
+-- TODO: Calculate Extrusion Amount per Combination and adjust speed to not exceed maxExtrusionAmount
 maxExtrusionBarrier :: [[Combination]] -> [[Combination]]
 maxExtrusionBarrier = undefined

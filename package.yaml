@@ -27,6 +27,7 @@ dependencies:
 - parallel
 - deepseq
 - QuickCheck
+#- zip
 
 library:
   source-dirs: src

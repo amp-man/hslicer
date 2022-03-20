@@ -21,10 +21,6 @@ Geplante vertiefende Themen:
 - Funktionale Referenzen (Linsen): Es sollen Datenstrukturen zur Beschreibung des Dreiecks-Mesh und der 2D-Pfade erzeugt werden.
   Verschiedene Berechnungen, die diese Datenstrukturen verändern, sollen Gebrauch von Linsen machen.
 
-
-In Ordnung, vielleicht kann man ja auch einen Teilparser mit den applikativen Parsern implementieren,
-um Applicative als Thema zu demonstrieren.
-
 Co-authored-by: KatjaFrey <KatjaFrey@users.noreply.github.com>
 
 Build command: stack build --ghc-options "-O -threaded -rtsopts"
