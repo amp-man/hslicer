@@ -2,7 +2,7 @@ module Examples.RealCuboid where
 
 import TriangleMesh
 
--- path = "test/Lib3mfSpec_res/box_sliced/3D/3dmodel.model"
+-- path = "resources/example_3mfs/box_sliced/3D/3dmodel.model"
 
 --vertices
 vertex_0, vertex_1, vertex_2, vertex_3, vertex_4, vertex_5, vertex_6, vertex_7 :: Vertex

@@ -3,7 +3,7 @@
 Thema:
 Programmieren eines Slicers für den 3D-Druck
 
-<img src="pictures/slice.png" width="300">
+<img src="resources/pictures/slice.png" width="300">
 
 Beschreibung:
 - Einlesen eines 3D-Körpers/Dreiecks-Mesh, dessen Vektoren, Normalen, und Flächen in einer mit
@@ -24,12 +24,12 @@ Geplante vertiefende Themen:
 Co-authored-by: KatjaFrey <KatjaFrey@users.noreply.github.com>
 
 Build command: stack build --ghc-options "-O -threaded -rtsopts"
-Run command: stack exec -- hslicer-exe "./test/Lib3mfSpec_res/box_sliced/3D/3dmodel.model" "./gcodefile.gcode"
-Time command: stack exec -- hslicer-exe "./test/Lib3mfSpec_res/Polygon/3D/3dmodel.model" "./gcodefile.gcode" +RTS -N -s 2>&1 | sed -n "/Total/p" 
+Run command: stack exec -- hslicer-exe "./resources/example_3mfs/box_sliced/3D/3dmodel.model" "./gcodefile.gcode"
+Time command: stack exec -- hslicer-exe "./resources/example_3mfs/Polygon/3D/3dmodel.model" "./gcodefile.gcode" +RTS -N -s 2>&1 | sed -n "/Total/p" 
 
 Time Benchmark for different cpu core nrs:
-for f in 1 2 3 4 5 6 7 8; do printf $f; printf ": "; stack exec -- hslicer-exe "./test/Lib3mfSpec_res/Polygon/3D/3dmodel.model" "./gcodefile.gcode" +RTS -N$f -s 2>&1 | sed -n "/Total/p";done
+for f in 1 2 3 4 5 6 7 8; do printf $f; printf ": "; stack exec -- hslicer-exe "./resources/example_3mfs/Polygon/3D/3dmodel.model" "./gcodefile.gcode" +RTS -N$f -s 2>&1 | sed -n "/Total/p";done
 
 Threadscope:
 stack build --ghc-options "-O -threaded -rtsopts -eventlog"
-stack exec -- hslicer-exe "./test/Lib3mfSpec_res/Polygon/3D/3dmodel.model" "./gcodefile.gcode" +RTS -N5 -l
+stack exec -- hslicer-exe "./resources/example_3mfs/Polygon/3D/3dmodel.model" "./gcodefile.gcode" +RTS -N5 -l

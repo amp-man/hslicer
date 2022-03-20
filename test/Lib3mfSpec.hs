@@ -7,7 +7,7 @@ import Examples.RealCuboid
 
 spec :: Spec
 spec = do
-   let path = "test/Lib3mfSpec_res/box_sliced/3D/3dmodel.model"
+   let path = "resources/example_3mfs/box_sliced/3D/3dmodel.model"
 
    it "parses vertices from 3mf file" $ do
       vertices <- parseVertices path
